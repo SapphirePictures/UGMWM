@@ -24,6 +24,31 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify CSS references exist
+        run: |
+          echo "Checking CSS references in dist/index.html"
+          if [ ! -f dist/index.html ]; then
+            echo "dist/index.html not found"; exit 1
+          fi
+          # extract href values that end with .css
+          mapfile -t hrefs < <(grep -oP 'href="[^"]+\.css"' dist/index.html | sed -E 's/^href="(.*)"$/\1/')
+          if [ ${#hrefs[@]} -eq 0 ]; then
+            echo "No CSS references found in dist/index.html"; exit 1
+          fi
+          echo "Found ${#hrefs[@]} CSS refs"
+          for h in "${hrefs[@]}"; do
+            # normalize path: remove leading ./ or /
+            p="${h#./}"
+            p="${p#/}"
+            if [ -f "dist/$p" ]; then
+              echo "OK: $p"
+            elif [ -f "dist${h}" ]; then
+              echo "OK: dist${h}"
+            else
+              echo "Missing CSS file for href: $h"; exit 1
+            fi
+          done
+
       - name: Upload dist artifact
         if: success()
         uses: actions/upload-artifact@v4
