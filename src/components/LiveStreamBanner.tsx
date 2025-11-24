@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Radio } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 
 interface LiveStreamBannerProps {
