@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { MapPin, Phone, Mail, Facebook, Instagram, Youtube, Twitter } from 'lucide-react';
 
 interface FooterProps {
@@ -6,6 +6,9 @@ interface FooterProps {
 }
 
 export function Footer({ onNavigate }: FooterProps) {
+  const [clickCount, setClickCount] = React.useState(0);
+  const [clickTimeout, setClickTimeout] = React.useState<NodeJS.Timeout | null>(null);
+
   const handleNavClick = (page: string) => {
     if (onNavigate) {
       onNavigate(page);
@@ -13,15 +16,48 @@ export function Footer({ onNavigate }: FooterProps) {
     }
   };
 
+  const handleLogoClick = () => {
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+
+    // Clear existing timeout
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+    }
+
+    // Navigate to admin after 3 clicks
+    if (newCount === 3) {
+      if (onNavigate) {
+        onNavigate('you-are-unlimited');
+      }
+      setClickCount(0);
+      setClickTimeout(null);
+    } else {
+      // Reset counter after 2 seconds of no clicks
+      const timeout = setTimeout(() => {
+        setClickCount(0);
+      }, 2000);
+      setClickTimeout(timeout);
+    }
+  };
+
   return (
     <footer className="bg-[var(--wine)] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* About Section */}
+          {/* About Section with Logo */}
           <div>
-            <h3 className="font-['Montserrat'] text-[var(--gold)] mb-4">
-              Unlimited Grace and Mercy
-            </h3>
+            <div
+              onClick={handleLogoClick}
+              className="cursor-pointer mb-4"
+            >
+              <h3 className="font-['Montserrat'] text-[var(--gold)] mb-1">
+                Unlimited Grace and Mercy
+              </h3>
+              <p className="font-['Montserrat'] text-sm text-[var(--gold-light)]">
+                Worldwide Mission Inc.
+              </p>
+            </div>
             <p className="text-white/80 mb-4 font-['Merriweather']">
               A gathering of souls enjoying the unlimited grace and mercy of God.
             </p>

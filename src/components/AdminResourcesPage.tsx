@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Plus, Trash2, Edit, FileText, Loader2, Download, DollarSign } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 
 interface Resource {
   id: string;
@@ -272,6 +272,9 @@ export function AdminResourcesPage() {
             <DialogTitle className="font-['Montserrat'] text-2xl text-[var(--wine)]">
               {editingResource ? 'Edit Resource' : 'Add New Resource'}
             </DialogTitle>
+            <DialogDescription className="sr-only">
+Manage your church resources
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>

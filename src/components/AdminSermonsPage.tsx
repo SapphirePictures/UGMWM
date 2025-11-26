@@ -7,7 +7,7 @@ import { Textarea } from './ui/textarea';
 import { Plus, Trash2, Edit, Video, Loader2, Calendar, User } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 
 interface Sermon {
   id: string;
@@ -263,6 +263,9 @@ export function AdminSermonsPage({ onNavigate, onLogout }: AdminSermonsPageProps
             <DialogTitle className="font-['Montserrat'] text-2xl text-[var(--wine)]">
               {editingSermon ? 'Edit Sermon' : 'Add New Sermon'}
             </DialogTitle>
+            <DialogDescription className="sr-only">
+Manage your church sermons
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
