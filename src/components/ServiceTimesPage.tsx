@@ -285,14 +285,6 @@ export function ServiceTimesPage({ onNavigate }: ServiceTimesPageProps) {
                 and community.
               </p>
             </Card>
-
-            <Card className="p-6 rounded-2xl">
-              <h3 className="font-['Montserrat'] text-lg text-[var(--wine)] mb-3">Dress Code</h3>
-              <p className="text-gray-600 font-['Merriweather']">
-                Come as you are! We welcome everyone regardless of how you're dressed. Some dress
-                formally, others casually - the most important thing is your presence.
-              </p>
-            </Card>
           </div>
         </div>
       </section>

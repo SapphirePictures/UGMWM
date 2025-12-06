@@ -6,6 +6,7 @@ import { createSermon, getAllSermons, getSermonById, updateSermon, deleteSermon,
 import { createResource, getAllResources, getResourceById, updateResource, deleteResource, initializeResourceBucket, incrementDownloadCount } from './resource-handler.tsx';
 import { createEvent, getAllEvents, getEventById, updateEvent, deleteEvent, getUpcomingEvents } from './event-handler.tsx';
 import homepageEventHandler from './homepage-event-handler.tsx';
+import { createEventGallery, getAllEventGalleries, getEventGalleryById, updateEventGallery, deleteEventGallery } from './event-gallery-handler.tsx';
 import * as kv from './kv_store.tsx';
 
 const app = new Hono();
@@ -344,6 +345,81 @@ app.delete('/make-server-9f158f76/events/:id', async (c) => {
 
 // ===== HOMEPAGE EVENT ROUTES =====
 app.route('/make-server-9f158f76/homepage-event', homepageEventHandler);
+
+// ===== EVENT GALLERY ROUTES =====
+
+// Get all event galleries (public)
+app.get('/make-server-9f158f76/event-galleries', async (c) => {
+  try {
+    const galleries = await getAllEventGalleries();
+    return c.json({ success: true, galleries });
+  } catch (error) {
+    console.error('Error fetching event galleries:', error);
+    return c.json({ error: 'Failed to fetch event galleries', details: error.message }, 500);
+  }
+});
+
+// Get event gallery by ID (public)
+app.get('/make-server-9f158f76/event-galleries/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const gallery = await getEventGalleryById(id);
+    if (!gallery) {
+      return c.json({ error: 'Event gallery not found' }, 404);
+    }
+    return c.json({ success: true, gallery });
+  } catch (error) {
+    console.error('Error fetching event gallery:', error);
+    return c.json({ error: 'Failed to fetch event gallery', details: error.message }, 500);
+  }
+});
+
+// Create event gallery (admin)
+app.post('/make-server-9f158f76/event-galleries', async (c) => {
+  try {
+    const data = await c.req.json();
+    
+    // Validate required fields
+    if (!data.eventName || !data.eventDate) {
+      return c.json({ error: 'Event name and date are required' }, 400);
+    }
+    
+    if (!data.media || !Array.isArray(data.media) || data.media.length === 0) {
+      return c.json({ error: 'At least one media item is required' }, 400);
+    }
+    
+    const gallery = await createEventGallery(data);
+    return c.json({ success: true, gallery });
+  } catch (error) {
+    console.error('Error creating event gallery:', error);
+    return c.json({ error: 'Failed to create event gallery', details: error.message }, 500);
+  }
+});
+
+// Update event gallery (admin)
+app.put('/make-server-9f158f76/event-galleries/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const data = await c.req.json();
+    const gallery = await updateEventGallery(id, data);
+    return c.json({ success: true, gallery });
+  } catch (error) {
+    console.error('Error updating event gallery:', error);
+    return c.json({ error: 'Failed to update event gallery', details: error.message }, 500);
+  }
+});
+
+// Delete event gallery (admin)
+app.delete('/make-server-9f158f76/event-galleries/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    await deleteEventGallery(id);
+    return c.json({ success: true, message: 'Event gallery deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting event gallery:', error);
+    return c.json({ error: 'Failed to delete event gallery', details: error.message }, 500);
+  }
+});
 
 // ===== LIVE STREAM ROUTES =====
 // Get live stream data

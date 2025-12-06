@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { getAllEvents } from '../utils/storage';
 
 interface EventsPageProps {
   onNavigate?: (page: string) => void;
 }
 
 export function EventsPage({ onNavigate }: EventsPageProps) {
-  const upcomingEvents = [
+  // All events in one place (these are the default events)
+  const defaultEvents = [
     {
+      id: 'thanksgiving-2024',
       title: 'Annual Thanksgiving Service 2024',
-      date: 'December 15, 2024',
+      date: '2024-12-15',
+      displayDate: 'December 15, 2024',
       time: '8:00 AM - 2:00 PM',
       location: 'Main Sanctuary, Oyo State',
       description:
@@ -20,8 +24,10 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
         'https://images.unsplash.com/photo-1626954499077-b56bd315594d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjB3b3JzaGlwJTIwTmlnZXJpYXxlbnwxfHx8fDE3NjMzOTc3Mjl8MA&ixlib=rb-4.1.0&q=80&w=1080',
     },
     {
+      id: 'youth-conf-2024',
       title: 'Youth Conference 2024',
-      date: 'December 20-22, 2024',
+      date: '2024-12-22',
+      displayDate: 'December 20-22, 2024',
       time: '6:00 PM - 9:00 PM Daily',
       location: 'Church Premises',
       description:
@@ -30,8 +36,10 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
         'https://images.unsplash.com/photo-1551327420-4b280d52cc68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjBjb21tdW5pdHklMjBmZWxsb3dzaGlwfGVufDF8fHx8MTc2MzM5NzczMXww&ixlib=rb-4.1.0&q=80&w=1080',
     },
     {
+      id: 'eoy-prayer-2024',
       title: 'End of Year Prayer & Praise Night',
-      date: 'December 31, 2024',
+      date: '2024-12-31',
+      displayDate: 'December 31, 2024',
       time: '9:00 PM - 12:30 AM',
       location: 'Main Sanctuary',
       description:
@@ -39,25 +47,91 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
       image:
         'https://images.unsplash.com/photo-1729089049653-24312fdca908?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZW9wbGUlMjBwcmF5aW5nJTIwdG9nZXRoZXJ8ZW58MXx8fHwxNzYzMzA4NDExfDA&ixlib=rb-4.1.0&q=80&w=1080',
     },
-  ];
-
-  const pastEvents = [
     {
+      id: 'womens-conf-2024',
+      title: 'Women\'s Conference',
+      date: '2024-11-15',
+      displayDate: 'November 2024',
+      description: 'A powerful gathering of women celebrating God\'s grace, featuring inspiring messages, worship, and fellowship.',
+    },
+    {
+      id: 'harvest-2024',
       title: 'Harvest Celebration',
-      date: 'October 2024',
+      date: '2024-10-15',
+      displayDate: 'October 2024',
       description: 'A blessed time of thanksgiving for God\'s provision and abundance.',
     },
     {
+      id: 'grace-conf-2024',
       title: 'Grace Conference',
-      date: 'September 2024',
+      date: '2024-09-15',
+      displayDate: 'September 2024',
       description: 'Three days of powerful teachings on living in God\'s grace.',
     },
     {
+      id: 'family-fun-2024',
       title: 'Family Fun Day',
-      date: 'August 2024',
+      date: '2024-08-15',
+      displayDate: 'August 2024',
       description: 'A day of fellowship, games, and bonding for families.',
     },
   ];
+
+  const [allEvents, setAllEvents] = useState(defaultEvents);
+
+  // Load events from IndexedDB on component mount and when page becomes visible
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        const events = await getAllEvents();
+        if (events.length > 0) {
+          setAllEvents(events);
+        } else {
+          setAllEvents(defaultEvents);
+        }
+      } catch (error) {
+        console.error('Error loading events:', error);
+        setAllEvents(defaultEvents);
+      }
+    };
+
+    loadEvents();
+
+    // Listen for storage changes from other tabs/windows
+    window.addEventListener('storage', loadEvents);
+    // Listen for custom event for same-tab updates
+    window.addEventListener('localStorageUpdate', loadEvents);
+    
+    return () => {
+      window.removeEventListener('storage', loadEvents);
+      window.removeEventListener('localStorageUpdate', loadEvents);
+    };
+  }, []);
+
+  // Get today's date at midnight for accurate comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Automatically filter events based on current date
+  const upcomingEvents = allEvents.filter(event => {
+    const eventDate = new Date(event.date);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate >= today;
+  }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const allPastEvents = allEvents.filter(event => {
+    const eventDate = new Date(event.date);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate < today;
+  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  // Display only the 3 most recent past events
+  const recentPastEvents = allPastEvents.slice(0, 3);
+  
+  // All other events (both upcoming and past combined for the all events section)
+  const allEventsForSection = [...upcomingEvents, ...allPastEvents].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
 
   return (
     <div className="min-h-screen pt-20">
@@ -96,16 +170,29 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
             {upcomingEvents.map((event, index) => (
               <Card
                 key={index}
-                className="overflow-hidden hover:shadow-xl transition-shadow duration-300 rounded-2xl"
+                className="overflow-hidden hover:shadow-xl transition-shadow duration-300 rounded-2xl cursor-pointer"
+                onClick={() => onNavigate?.(`event-detail-${event.id}`)}
               >
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-0">
                   {/* Image */}
-                  <div className="lg:col-span-1 h-64 lg:h-auto">
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="lg:col-span-1 h-64 lg:h-auto bg-gray-200">
+                    {event.image ? (
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--wine)] to-[var(--wine-dark)]"><svg class="w-16 h-16 text-white opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--wine)] to-[var(--wine-dark)]">
+                        <svg className="w-16 h-16 text-white opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                      </div>
+                    )}
                   </div>
 
                   {/* Content */}
@@ -117,7 +204,7 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
                     <div className="flex flex-col gap-3 mb-6">
                       <div className="flex items-center gap-3 text-gray-600">
                         <Calendar className="w-5 h-5 text-[var(--gold)]" />
-                        <span className="font-['Merriweather']">{event.date}</span>
+                        <span className="font-['Merriweather']">{event.displayDate}</span>
                       </div>
                       <div className="flex items-center gap-3 text-gray-600">
                         <Clock className="w-5 h-5 text-[var(--gold)]" />
@@ -133,8 +220,14 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
                       {event.description}
                     </p>
 
-                    <Button className="bg-[var(--wine)] text-white hover:bg-[var(--wine-dark)] font-['Montserrat']">
-                      Register Now
+                    <Button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNavigate?.(`event-detail-${event.id}`);
+                      }}
+                      className="bg-[var(--wine)] text-white hover:bg-[var(--wine-dark)] font-['Montserrat']"
+                    >
+                      View Event Details
                     </Button>
                   </div>
                 </div>
@@ -201,29 +294,53 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
       </section>
 
       {/* Past Events */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="font-['Montserrat'] text-3xl md:text-4xl text-[var(--wine)] mb-4">
-              Past Events
-            </h2>
-            <div className="w-24 h-1 bg-[var(--gold)] mx-auto"></div>
-          </div>
+      {recentPastEvents.length > 0 && (
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="font-['Montserrat'] text-3xl md:text-4xl text-[var(--wine)] mb-4">
+                Recent Past Events
+              </h2>
+              <div className="w-24 h-1 bg-[var(--gold)] mx-auto"></div>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {pastEvents.map((event, index) => (
-              <Card key={index} className="p-6 rounded-2xl hover:shadow-lg transition-shadow">
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar className="w-5 h-5 text-[var(--gold)]" />
-                  <span className="text-[var(--gold)] font-['Montserrat']">{event.date}</span>
-                </div>
-                <h3 className="font-['Montserrat'] text-lg text-[var(--wine)] mb-3">
-                  {event.title}
-                </h3>
-                <p className="text-gray-600 font-['Merriweather'] text-sm">{event.description}</p>
-              </Card>
-            ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {recentPastEvents.map((event, index) => (
+                <Card 
+                  key={index} 
+                  className="p-6 rounded-2xl hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => onNavigate?.(`event-detail-${event.id}`)}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <Calendar className="w-5 h-5 text-[var(--gold)]" />
+                    <span className="text-[var(--gold)] font-['Montserrat']">{event.displayDate}</span>
+                  </div>
+                  <h3 className="font-['Montserrat'] text-lg text-[var(--wine)] mb-3">
+                    {event.title}
+                  </h3>
+                  <p className="text-gray-600 font-['Merriweather'] text-sm">{event.description}</p>
+                </Card>
+              ))}
+            </div>
           </div>
+        </section>
+      )}
+
+      {/* View All Events Button */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="font-['Montserrat'] text-3xl md:text-4xl text-[var(--wine)] mb-6">
+            Looking for More Events?
+          </h2>
+          <p className="text-gray-600 font-['Merriweather'] text-lg mb-8 max-w-2xl mx-auto">
+            Browse through our complete archive of events - both past and upcoming
+          </p>
+          <Button 
+            onClick={() => onNavigate?.('all-events')}
+            className="bg-[var(--wine)] text-white hover:bg-[var(--wine-dark)] font-['Montserrat'] text-lg px-8 py-6"
+          >
+            View All Events
+          </Button>
         </div>
       </section>
 

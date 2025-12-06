@@ -17,7 +17,8 @@ import {
   Loader2,
   Video,
   Home,
-  Radio
+  Radio,
+  Image as ImageIcon
 } from 'lucide-react';
 import { AdminVolunteersPage } from './AdminVolunteersPage';
 import { SetupInstructionsPage } from './SetupInstructionsPage';
@@ -26,6 +27,7 @@ import { AdminResourcesPage } from './AdminResourcesPage';
 import { AdminEventsPage } from './AdminEventsPage';
 import { AdminHomepageEventPage } from './AdminHomepageEventPage';
 import { AdminLiveStreamPage } from './AdminLiveStreamPage';
+import { AdminEventGalleryPage } from './AdminEventGalleryPage';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { toast } from 'sonner@2.0.3';
@@ -119,6 +121,7 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
     { id: 'sermons', label: 'Sermons', icon: Video },
     { id: 'resources', label: 'Resources', icon: FileText },
     { id: 'events', label: 'Events', icon: Calendar },
+    { id: 'event-gallery', label: 'Event Gallery', icon: ImageIcon },
   ];
 
   // Render different sections based on active selection
@@ -149,6 +152,10 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
 
     if (activeSection === 'live-stream') {
       return <AdminLiveStreamPage onNavigate={onNavigate} onLogout={onLogout} />;
+    }
+
+    if (activeSection === 'event-gallery') {
+      return <AdminEventGalleryPage />;
     }
 
     // Overview Dashboard

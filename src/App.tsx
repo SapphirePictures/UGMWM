@@ -4,6 +4,9 @@ import { Footer } from './components/Footer';
 import { HomePage } from './components/HomePage';
 import { AboutPage } from './components/AboutPage';
 import { EventsPage } from './components/EventsPage';
+import { AllEventsPage } from './components/AllEventsPage';
+import { EventGalleryPage } from './components/EventGalleryPage';
+import { EventDetailPage } from './components/EventDetailPage';
 import { SermonsPage } from './components/SermonsPage';
 import { ServiceTimesPage } from './components/ServiceTimesPage';
 import { GivingPage } from './components/GivingPage';
@@ -78,6 +81,10 @@ export default function App() {
         return <AboutPage onNavigate={handleNavigate} />;
       case 'events':
         return <EventsPage onNavigate={handleNavigate} />;
+      case 'all-events':
+        return <AllEventsPage onNavigate={handleNavigate} />;
+      case 'event-gallery':
+        return <EventGalleryPage onNavigate={handleNavigate} />;
       case 'sermons':
         return <SermonsPage onNavigate={handleNavigate} />;
       case 'service-times':
@@ -99,6 +106,11 @@ export default function App() {
       case 'watch-live':
         return <WatchLivePage onNavigate={handleNavigate} />;
       default:
+        // Handle event detail pages (event-detail-{id})
+        if (currentPage.startsWith('event-detail-')) {
+          const eventId = currentPage.replace('event-detail-', '');
+          return <EventDetailPage eventId={eventId} onNavigate={handleNavigate} />;
+        }
         return <HomePage onNavigate={handleNavigate} />;
     }
   };

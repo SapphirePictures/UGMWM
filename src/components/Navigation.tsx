@@ -83,6 +83,14 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
               Events
             </button>
             <button
+              onClick={() => handleNavClick('event-gallery')}
+              className={`${currentPage === 'home' && !isScrolled ? 'text-white' : isScrolled ? 'text-white' : 'text-black'} hover:text-[var(--gold)] transition-colors font-['Montserrat'] ${
+                currentPage === 'event-gallery' ? 'text-[var(--gold)]' : ''
+              }`}
+            >
+              Gallery
+            </button>
+            <button
               onClick={() => handleNavClick('sermons')}
               className={`${currentPage === 'home' && !isScrolled ? 'text-white' : isScrolled ? 'text-white' : 'text-black'} hover:text-[var(--gold)] transition-colors font-['Montserrat'] ${
                 currentPage === 'sermons' ? 'text-[var(--gold)]' : ''
@@ -160,6 +168,14 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
                 }`}
               >
                 Events
+              </button>
+              <button
+                onClick={() => handleNavClick('event-gallery')}
+                className={`text-white hover:text-[var(--gold)] transition-colors text-left font-['Montserrat'] ${
+                  currentPage === 'event-gallery' ? 'text-[var(--gold)]' : ''
+                }`}
+              >
+                Gallery
               </button>
               <button
                 onClick={() => handleNavClick('sermons')}
