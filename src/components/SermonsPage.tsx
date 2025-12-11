@@ -5,6 +5,7 @@ import { Play, Download, Share2, Clock, Loader2, Video } from 'lucide-react';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { toast } from 'sonner@2.0.3';
 import { VideoPlayerModal } from './VideoPlayerModal';
+import { getOptimizedImageUrl, getImageSrcSet } from '../utils/storage';
 
 interface SermonsPageProps {
   onNavigate?: (page: string) => void;
@@ -71,9 +72,10 @@ export function SermonsPage({ onNavigate }: SermonsPageProps) {
       <section className="relative h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1655392030885-8468507fb045?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjBpbnRlcmlvciUyMHdvcnNoaXB8ZW58MXx8fHwxNzYzMzAxNTMwfDA&ixlib=rb-4.1.0&q=80&w=1080"
+            src={getOptimizedImageUrl("https://images.unsplash.com/photo-1655392030885-8468507fb045?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjBpbnRlcmlvciUyMHdvcnNoaXB8ZW58MXx8fHwxNzYzMzAxNTMwfDA&ixlib=rb-4.1.0&q=80&w=1080", { width: 1920, quality: 85, format: 'webp' })}
             alt="Sermons"
             className="w-full h-full object-cover"
+            loading="eager"
           />
           <div className="absolute inset-0 bg-[var(--wine)]/80"></div>
         </div>
@@ -143,9 +145,12 @@ export function SermonsPage({ onNavigate }: SermonsPageProps) {
                     <div className="relative h-48 bg-gradient-to-br from-[var(--wine)] to-[var(--wine-dark)] overflow-hidden">
                       {sermon.thumbnailUrl ? (
                         <img
-                          src={sermon.thumbnailUrl}
+                          src={getOptimizedImageUrl(sermon.thumbnailUrl, { width: 480, height: 320, quality: 85, format: 'webp', resize: 'cover' })}
+                          srcSet={getImageSrcSet(sermon.thumbnailUrl)}
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           alt={sermon.title}
                           className="w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-110 transition-all duration-300"
+                          loading="lazy"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

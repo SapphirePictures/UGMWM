@@ -22,6 +22,7 @@ import { VideoPlayerModal } from './VideoPlayerModal';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { toast } from 'sonner';
 import { LiveStreamBanner } from './LiveStreamBanner';
+import { getOptimizedImageUrl, getImageSrcSet } from '../utils/storage';
 
 interface HomePageProps {
   onNavigate?: (page: string) => void;
@@ -482,9 +483,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
                     <div className="relative h-48 bg-gradient-to-br from-[var(--wine)] to-[var(--wine-dark)]">
                       {sermon.thumbnailUrl ? (
                         <img
-                          src={sermon.thumbnailUrl}
+                          src={getOptimizedImageUrl(sermon.thumbnailUrl, { width: 480, height: 320, quality: 85, format: 'webp', resize: 'cover' })}
+                          srcSet={getImageSrcSet(sermon.thumbnailUrl)}
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           alt={sermon.title}
                           className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                          loading="lazy"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

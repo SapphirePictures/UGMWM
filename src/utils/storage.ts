@@ -6,6 +6,106 @@ const DB_VERSION = 1;
 
 let db: IDBDatabase | null = null;
 
+// Image transformation utilities for Supabase Storage
+export interface ImageTransformOptions {
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: 'webp' | 'avif' | 'jpg' | 'png';
+  resize?: 'cover' | 'contain' | 'fill';
+}
+
+/**
+ * Transform Supabase storage URL with image optimization parameters
+ * @param url - Original Supabase storage URL or any image URL
+ * @param options - Transformation options (width, height, quality, format, resize mode)
+ * @returns Optimized image URL
+ */
+export const getOptimizedImageUrl = (
+  url: string | undefined,
+  options: ImageTransformOptions = {}
+): string => {
+  if (!url) return '';
+
+  // Don't transform base64 data URLs
+  if (url.startsWith('data:')) {
+    return url;
+  }
+
+  // Check if it's a Supabase storage URL
+  const isSupabaseUrl = url.includes('.supabase.co/storage/v1/object/public/');
+  
+  if (!isSupabaseUrl) {
+    // For external URLs (Unsplash, etc.), return as-is
+    return url;
+  }
+
+  // Parse the URL to get the bucket and path
+  const urlParts = url.split('/storage/v1/object/public/');
+  if (urlParts.length < 2) return url;
+
+  const baseUrl = urlParts[0];
+  const [bucket, ...pathParts] = urlParts[1].split('/');
+  const path = pathParts.join('/');
+
+  // Build transformation URL
+  const transformUrl = `${baseUrl}/storage/v1/render/image/public/${bucket}/${path}`;
+  
+  // Build query parameters
+  const params = new URLSearchParams();
+  
+  if (options.width) params.append('width', options.width.toString());
+  if (options.height) params.append('height', options.height.toString());
+  if (options.quality) params.append('quality', options.quality.toString());
+  if (options.format) params.append('format', options.format);
+  if (options.resize) params.append('resize', options.resize);
+
+  const queryString = params.toString();
+  return queryString ? `${transformUrl}?${queryString}` : transformUrl;
+};
+
+/**
+ * Get responsive image URLs for different screen sizes
+ * @param url - Original image URL
+ * @returns Object with URLs for different viewport sizes
+ */
+export const getResponsiveImageUrls = (url: string | undefined) => {
+  if (!url) return {
+    mobile: '',
+    tablet: '',
+    desktop: '',
+    thumbnail: ''
+  };
+
+  return {
+    thumbnail: getOptimizedImageUrl(url, { width: 150, height: 150, quality: 75, format: 'webp', resize: 'cover' }),
+    mobile: getOptimizedImageUrl(url, { width: 640, quality: 80, format: 'webp' }),
+    tablet: getOptimizedImageUrl(url, { width: 1024, quality: 85, format: 'webp' }),
+    desktop: getOptimizedImageUrl(url, { width: 1920, quality: 85, format: 'webp' }),
+    original: url
+  };
+};
+
+/**
+ * Generate srcset attribute for responsive images
+ * @param url - Original image URL
+ * @returns srcset string for use in img tags
+ */
+export const getImageSrcSet = (url: string | undefined): string => {
+  if (!url) return '';
+  
+  // Don't generate srcset for non-Supabase URLs or base64 data URLs
+  const isSupabaseUrl = url.includes('.supabase.co/storage/v1/object/public/');
+  const isDataUrl = url.startsWith('data:');
+  
+  if (!isSupabaseUrl || isDataUrl) {
+    return '';
+  }
+  
+  const urls = getResponsiveImageUrls(url);
+  return `${urls.mobile} 640w, ${urls.tablet} 1024w, ${urls.desktop} 1920w`;
+};
+
 // Initialize IndexedDB
 export const initDB = (): Promise<IDBDatabase> => {
   return new Promise((resolve, reject) => {

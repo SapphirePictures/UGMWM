@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Calendar, Image as ImageIcon, Video, Loader2, X, Play } from 'lucide-react';
+import { getOptimizedImageUrl, getImageSrcSet } from '../utils/storage';
 
 interface MediaItem {
   id: string;
@@ -107,9 +108,10 @@ export function EventGalleryPage({ onNavigate }: EventGalleryPageProps) {
       <section className="relative h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1511578314322-379afb476865?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjBldmVudCUyMGdhbGxlcnl8ZW58MXx8fHwxNzYzMzk3NzI5fDA&ixlib=rb-4.1.0&q=80&w=1080"
+            src={getOptimizedImageUrl("https://images.unsplash.com/photo-1511578314322-379afb476865?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjBldmVudCUyMGdhbGxlcnl8ZW58MXx8fHwxNzYzMzk3NzI5fDA&ixlib=rb-4.1.0&q=80&w=1080", { width: 1920, quality: 85, format: 'webp' })}
             alt="Event Gallery"
             className="w-full h-full object-cover"
+            loading="eager"
           />
           <div className="absolute inset-0 bg-[var(--wine)]/80"></div>
         </div>
@@ -192,9 +194,12 @@ export function EventGalleryPage({ onNavigate }: EventGalleryPageProps) {
                         <div className="relative aspect-square">
                           {media.type === 'image' ? (
                             <img
-                              src={media.url}
+                              src={getOptimizedImageUrl(media.url, { width: 400, height: 400, quality: 85, format: 'webp', resize: 'cover' })}
+                              srcSet={getImageSrcSet(media.url)}
+                              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                               alt={media.caption || 'Event photo'}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              loading="lazy"
                             />
                           ) : (
                             <div className="relative w-full h-full bg-gray-900">

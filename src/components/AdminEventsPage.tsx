@@ -56,6 +56,7 @@ export function AdminEventsPage() {
   const [newMediaCaption, setNewMediaCaption] = useState('');
   const [newMediaType, setNewMediaType] = useState<'image' | 'video'>('image');
   const [isSaving, setIsSaving] = useState(false);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
 
   useEffect(() => {
     initializeStorage();
@@ -130,6 +131,7 @@ export function AdminEventsPage() {
 
     if (!isImage && !isVideo) {
       toast.error('Please select an image or video file');
+      e.target.value = ''; // Reset input
       return;
     }
 
@@ -139,71 +141,116 @@ export function AdminEventsPage() {
     
     if (isImage && file.size > maxImageSize) {
       toast.error('Image is too large. Please use an image under 1MB or use a URL instead (recommended).');
+      e.target.value = ''; // Reset input
       return;
     }
     
     if (isVideo && file.size > maxVideoSize) {
       toast.error('Video is too large. Please upload to YouTube/Vimeo and use the URL option instead.');
+      e.target.value = ''; // Reset input
       return;
     }
 
     try {
       if (isImage) {
-        toast.info('Compressing image...');
+        setIsProcessingImage(true);
+        const loadingToast = toast.loading('Processing image...', { duration: Infinity });
         
         // Aggressive compression for localStorage
         const img = new Image();
         const reader = new FileReader();
         
+        reader.onerror = () => {
+          toast.dismiss(loadingToast);
+          toast.error('Failed to read image file');
+          setIsProcessingImage(false);
+          e.target.value = ''; // Reset input
+        };
+        
         reader.onload = (event) => {
           img.src = event.target?.result as string;
           
+          img.onerror = () => {
+            toast.dismiss(loadingToast);
+            toast.error('Failed to load image. Please try a different file.');
+            setIsProcessingImage(false);
+            e.target.value = ''; // Reset input
+          };
+          
           img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
-            
-            // More aggressive resizing - max 800px
-            const maxDimension = 800;
-            if (width > maxDimension || height > maxDimension) {
-              if (width > height) {
-                height = (height / width) * maxDimension;
-                width = maxDimension;
-              } else {
-                width = (width / height) * maxDimension;
-                height = maxDimension;
+            try {
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
+              
+              // More aggressive resizing - max 800px
+              const maxDimension = 800;
+              if (width > maxDimension || height > maxDimension) {
+                if (width > height) {
+                  height = (height / width) * maxDimension;
+                  width = maxDimension;
+                } else {
+                  width = (width / height) * maxDimension;
+                  height = maxDimension;
+                }
               }
+              
+              canvas.width = width;
+              canvas.height = height;
+              
+              const ctx = canvas.getContext('2d');
+              if (!ctx) {
+                toast.dismiss(loadingToast);
+                toast.error('Failed to process image');
+                setIsProcessingImage(false);
+                e.target.value = ''; // Reset input
+                return;
+              }
+              
+              ctx.drawImage(img, 0, 0, width, height);
+              
+              // More aggressive compression (0.6 quality)
+              const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+              
+              // Check final size
+              const sizeInBytes = (compressedBase64.length * 3) / 4;
+              const finalSizeMB = sizeInBytes / 1024 / 1024;
+              
+              toast.dismiss(loadingToast);
+              
+              if (finalSizeMB > 0.5) {
+                toast.warning(`Image compressed to ${finalSizeMB.toFixed(2)}MB. Consider using a URL for better performance.`, { duration: 5000 });
+              } else {
+                toast.success(`✓ Image ready! (${finalSizeMB.toFixed(2)}MB) Add a caption and click "Add Photo"`);
+              }
+              
+              setNewMediaUrl(compressedBase64);
+              setNewMediaType('image');
+              setIsProcessingImage(false);
+              
+              // Reset file input so same file can be selected again if needed
+              e.target.value = '';
+            } catch (err) {
+              toast.dismiss(loadingToast);
+              toast.error('Failed to compress image');
+              console.error('Compression error:', err);
+              setIsProcessingImage(false);
+              e.target.value = ''; // Reset input
             }
-            
-            canvas.width = width;
-            canvas.height = height;
-            
-            const ctx = canvas.getContext('2d');
-            ctx?.drawImage(img, 0, 0, width, height);
-            
-            // More aggressive compression (0.6 quality)
-            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
-            
-            // Check final size
-            const finalSize = new Blob([compressedBase64]).size / 1024 / 1024;
-            if (finalSize > 0.5) {
-              toast.warning('Image is still large after compression. Consider using a URL instead.');
-            }
-            
-            setNewMediaUrl(compressedBase64);
-            setNewMediaType('image');
-            toast.success('Image compressed! Add a caption and click "Add Photo"');
           };
         };
         
         reader.readAsDataURL(file);
       } else if (isVideo) {
         toast.error('Please upload videos to YouTube/Vimeo and use the URL option. Videos are too large for direct upload.');
+        e.target.value = ''; // Reset input
         return;
       }
     } catch (error) {
       console.error('Error uploading file:', error);
       toast.error('Failed to upload file');
+      setIsProcessingImage(false);
+      e.target.value = ''; // Reset input
     }
   };
 
@@ -591,43 +638,79 @@ Manage your church events
                         if (file) {
                           if (file.size > 1024 * 1024) {
                             toast.error('Image too large. Use an image under 1MB or paste a URL instead.');
+                            e.target.value = '';
                             return;
                           }
                           
-                          toast.info('Compressing cover image...');
+                          const loadingToast = toast.loading('Processing cover image...', { duration: Infinity });
                           
                           const img = new Image();
                           const reader = new FileReader();
                           
+                          reader.onerror = () => {
+                            toast.dismiss(loadingToast);
+                            toast.error('Failed to read image file');
+                            e.target.value = '';
+                          };
+                          
                           reader.onload = (event) => {
                             img.src = event.target?.result as string;
                             
+                            img.onerror = () => {
+                              toast.dismiss(loadingToast);
+                              toast.error('Failed to load image. Please try a different file.');
+                              e.target.value = '';
+                            };
+                            
                             img.onload = () => {
-                              const canvas = document.createElement('canvas');
-                              let width = img.width;
-                              let height = img.height;
-                              
-                              // Max 800px
-                              const maxDimension = 800;
-                              if (width > maxDimension || height > maxDimension) {
-                                if (width > height) {
-                                  height = (height / width) * maxDimension;
-                                  width = maxDimension;
-                                } else {
-                                  width = (width / height) * maxDimension;
-                                  height = maxDimension;
+                              try {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                
+                                // Max 800px
+                                const maxDimension = 800;
+                                if (width > maxDimension || height > maxDimension) {
+                                  if (width > height) {
+                                    height = (height / width) * maxDimension;
+                                    width = maxDimension;
+                                  } else {
+                                    width = (width / height) * maxDimension;
+                                    height = maxDimension;
+                                  }
                                 }
+                                
+                                canvas.width = width;
+                                canvas.height = height;
+                                
+                                const ctx = canvas.getContext('2d');
+                                if (!ctx) {
+                                  toast.dismiss(loadingToast);
+                                  toast.error('Failed to process image');
+                                  e.target.value = '';
+                                  return;
+                                }
+                                
+                                ctx.drawImage(img, 0, 0, width, height);
+                                
+                                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+                                
+                                // Calculate size
+                                const sizeInBytes = (compressedBase64.length * 3) / 4;
+                                const finalSizeMB = sizeInBytes / 1024 / 1024;
+                                
+                                setFormData({ ...formData, image: compressedBase64 });
+                                
+                                toast.dismiss(loadingToast);
+                                toast.success(`✓ Cover image ready! (${finalSizeMB.toFixed(2)}MB)`, { duration: 3000 });
+                                
+                                e.target.value = '';
+                              } catch (err) {
+                                toast.dismiss(loadingToast);
+                                toast.error('Failed to compress image');
+                                console.error('Compression error:', err);
+                                e.target.value = '';
                               }
-                              
-                              canvas.width = width;
-                              canvas.height = height;
-                              
-                              const ctx = canvas.getContext('2d');
-                              ctx?.drawImage(img, 0, 0, width, height);
-                              
-                              const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
-                              setFormData({ ...formData, image: compressedBase64 });
-                              toast.success('Cover image compressed and ready');
                             };
                           };
                           
@@ -712,11 +795,15 @@ Manage your church events
                         type="file"
                         accept={newMediaType === 'image' ? 'image/*' : 'video/*'}
                         onChange={handleFileUpload}
+                        disabled={isProcessingImage}
                         className="flex-1"
                       />
+                      {isProcessingImage && (
+                        <Loader2 className="w-5 h-5 animate-spin text-[var(--wine)]" />
+                      )}
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      {newMediaType === 'image' ? 'Upload a photo from your device' : 'Upload a video from your device (Note: Large videos may take time to load)'}
+                      {newMediaType === 'image' ? 'Upload a photo from your device (max 1MB recommended)' : 'Upload a video from your device (Note: Large videos may take time to load)'}
                     </p>
                   </div>
 
@@ -748,21 +835,29 @@ Manage your church events
                   
                   {/* Media Preview */}
                   {newMediaUrl && (
-                    <div className="mt-3">
-                      <Label className="font-['Montserrat'] text-sm mb-2 block">Preview:</Label>
+                    <div className="mt-3 p-3 border-2 border-green-500 rounded-lg bg-green-50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                        </div>
+                        <Label className="font-['Montserrat'] text-sm text-green-700">Ready to add:</Label>
+                      </div>
                       {newMediaType === 'image' ? (
                         <img 
                           src={newMediaUrl} 
                           alt="Preview" 
-                          className="w-full h-40 object-cover rounded-lg"
+                          className="w-full h-40 object-cover rounded-lg border-2 border-green-200"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
+                            toast.error('Failed to load image preview');
                           }}
                         />
                       ) : (
-                        <div className="bg-gray-100 p-4 rounded-lg text-center">
-                          <Video className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                          <p className="text-sm text-gray-600">Video ready to add</p>
+                        <div className="bg-white p-4 rounded-lg text-center border-2 border-green-200">
+                          <Video className="w-12 h-12 mx-auto mb-2 text-green-600" />
+                          <p className="text-sm text-green-700 font-['Montserrat']">Video ready to add</p>
                         </div>
                       )}
                     </div>
