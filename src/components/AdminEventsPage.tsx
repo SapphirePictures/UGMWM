@@ -135,12 +135,12 @@ export function AdminEventsPage() {
       return;
     }
 
-    // Strict file size limits for localStorage
-    const maxImageSize = 1 * 1024 * 1024; // 1MB
-    const maxVideoSize = 5 * 1024 * 1024; // 5MB
+    // File size limits for IndexedDB storage
+    const maxImageSize = 5 * 1024 * 1024; // 5MB
+    const maxVideoSize = 10 * 1024 * 1024; // 10MB
     
     if (isImage && file.size > maxImageSize) {
-      toast.error('Image is too large. Please use an image under 1MB or use a URL instead (recommended).');
+      toast.error('Image is too large. Please use an image under 5MB or use a URL instead (recommended for better performance).');
       e.target.value = ''; // Reset input
       return;
     }
@@ -628,7 +628,7 @@ Manage your church events
                 <div className="space-y-3">
                   <div>
                     <Label className="font-['Montserrat'] text-sm mb-1 block">
-                      Upload from Device (Max 1MB)
+                      Upload from Device (Max 5MB)
                     </Label>
                     <Input
                       type="file"
@@ -636,8 +636,8 @@ Manage your church events
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          if (file.size > 1024 * 1024) {
-                            toast.error('Image too large. Use an image under 1MB or paste a URL instead.');
+                          if (file.size > 5 * 1024 * 1024) {
+                            toast.error('Image too large. Use an image under 5MB or paste a URL instead.');
                             e.target.value = '';
                             return;
                           }
@@ -803,7 +803,7 @@ Manage your church events
                       )}
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      {newMediaType === 'image' ? 'Upload a photo from your device (max 1MB recommended)' : 'Upload a video from your device (Note: Large videos may take time to load)'}
+                      {newMediaType === 'image' ? 'Upload a photo from your device (max 5MB). For best performance, use Supabase Storage URLs.' : 'Upload a video from your device (max 10MB). For best performance, use YouTube/Vimeo URLs.'}
                     </p>
                   </div>
 

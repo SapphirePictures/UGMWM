@@ -123,33 +123,15 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Video Background */}
+      {/* Hero Section with Static Background */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Static Background Image - Shows immediately */}
+        {/* Static Background Image */}
         <div 
           className="absolute inset-0 w-full h-full bg-cover bg-center"
           style={{
             backgroundImage: `linear-gradient(rgba(114, 47, 55, 0.7), rgba(114, 47, 55, 0.5)), url('https://images.unsplash.com/photo-1667068114508-0055f7fb25a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjB3b3JzaGlwJTIwaGFuZHMlMjByYWlzZWR8ZW58MXx8fHwxNzYzNjQ0NjcyfDA&ixlib=rb-4.1.0&q=80&w=1080')`
           }}
         />
-        
-        {/* Background Video - Loads on top of image */}
-        <div className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}>
-          <iframe
-            src="https://player.vimeo.com/video/1138831482?autoplay=1&loop=1&muted=1&background=1&controls=0"
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full w-auto h-auto"
-            style={{ width: '100vw', height: '56.25vw', minHeight: '100vh', minWidth: '177.78vh' }}
-            frameBorder="0"
-            allow="autoplay; fullscreen"
-            title="Church Background Video"
-            onLoad={() => {
-              // Delay showing video to ensure it's actually playing
-              setTimeout(() => setVideoLoaded(true), 1500);
-            }}
-          ></iframe>
-          {/* Wine overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0)] to-[rgba(114,47,55,0.5)]"></div>
-        </div>
 
         {/* Hero Content */}
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
