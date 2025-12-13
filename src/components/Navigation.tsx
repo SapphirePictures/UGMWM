@@ -40,7 +40,7 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
             <img
               src={churchLogo}
               alt="Unlimited Grace & Mercy Worldwide Mission Inc."
-              className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
+              className="h-14 w-14 sm:h-16 sm:w-16 md:h-18 md:w-18 object-contain"
             />
           </div>
 

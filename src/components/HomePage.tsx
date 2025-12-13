@@ -158,15 +158,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
         {/* Hero Content */}
         <div className="relative z-20 text-center text-white px-4 max-w-4xl mx-auto">
-          {/* Church Logo */}
-          <div className="flex justify-center mb-8">
-            <img
-              src={churchLogo}
-              alt="Unlimited Grace & Mercy Worldwide Mission Inc. Logo"
-              className="w-36 h-36 object-contain"
-            />
-          </div>
-
           <h1 className="font-['Montserrat'] text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-6 leading-tight">
             Welcome to Unlimited Grace and Mercy Worldwide Mission Inc.
           </h1>
