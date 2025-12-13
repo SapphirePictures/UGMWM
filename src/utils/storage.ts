@@ -45,8 +45,11 @@ export const getOptimizedImageUrl = (
   if (urlParts.length < 2) return url;
 
   const baseUrl = urlParts[0];
-  const [bucket, ...pathParts] = urlParts[1].split('/');
-  const path = pathParts.join('/');
+  const [bucketRaw, ...pathPartsRaw] = urlParts[1].split('/');
+
+  // Encode bucket and path segments to avoid breaking on spaces, ampersands, etc.
+  const bucket = encodeURIComponent(bucketRaw);
+  const path = pathPartsRaw.map((p) => encodeURIComponent(p)).join('/');
 
   // Build transformation URL
   const transformUrl = `${baseUrl}/storage/v1/render/image/public/${bucket}/${path}`;
