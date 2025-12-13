@@ -281,7 +281,7 @@ export function EventGalleryPage({ onNavigate }: EventGalleryPageProps) {
             <X className="w-8 h-8" />
           </button>
 
-          <div className="w-full max-w-6xl grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 sm:gap-6">
+          <div className="w-full max-w-6xl flex items-center justify-center gap-3 sm:gap-6">
             {selectedGallery.media.length > 1 ? (
               <button
                 onClick={prevMedia}
@@ -296,7 +296,7 @@ export function EventGalleryPage({ onNavigate }: EventGalleryPageProps) {
               <div className="w-10 h-10 sm:w-12 sm:h-12" aria-hidden />
             )}
 
-            <div className="relative flex justify-center">
+            <div className="relative flex justify-center w-full max-w-[calc(100%-160px)]">
               {selectedMedia.type === 'image' ? (
                 <img
                   src={selectedMedia.url}
