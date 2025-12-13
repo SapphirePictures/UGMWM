@@ -429,13 +429,13 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } lg:translate-x-0`}
         >
-          <div className="p-6">
+          <div className="p-6 relative">
             {/* Collapse Button - Desktop Only */}
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="hidden lg:flex absolute -right-3 top-8 bg-white border border-gray-200 rounded-full p-1 shadow-md hover:bg-gray-50 transition-colors"
+              className="hidden lg:flex absolute -right-3 top-4 bg-[var(--wine)] text-white border-2 border-white rounded-full p-2 shadow-lg hover:bg-[var(--wine-dark)] transition-colors z-50"
             >
-              <ChevronLeft className={`w-4 h-4 text-gray-600 transition-transform ${isSidebarCollapsed ? 'rotate-180' : ''}`} />
+              <ChevronLeft className={`w-5 h-5 transition-transform ${isSidebarCollapsed ? 'rotate-180' : ''}`} />
             </button>
 
             {!isSidebarCollapsed && (
