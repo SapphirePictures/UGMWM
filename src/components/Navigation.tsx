@@ -114,12 +114,6 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
             >
               Service Times
             </button>
-            <Button
-              onClick={() => handleNavClick('giving')}
-              className="bg-[var(--gold)] text-[var(--wine-dark)] hover:bg-[var(--gold-light)] font-['Montserrat']"
-            >
-              Give
-            </Button>
           </div>
 
           {/* Mobile menu button */}
@@ -201,12 +195,6 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
               >
                 Service Times
               </button>
-              <Button
-                onClick={() => handleNavClick('giving')}
-                className="bg-[var(--gold)] text-[var(--wine-dark)] hover:bg-[var(--gold-light)] font-['Montserrat'] w-full"
-              >
-                Give
-              </Button>
             </div>
           </div>
         )}

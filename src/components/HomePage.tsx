@@ -123,15 +123,36 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Static Background */}
+      {/* Hero Section with Video Background */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Static Background Image */}
+        {/* Static Background Image - Shows while video loads */}
         <div 
           className="absolute inset-0 w-full h-full bg-cover bg-center"
           style={{
             backgroundImage: `linear-gradient(rgba(114, 47, 55, 0.7), rgba(114, 47, 55, 0.5)), url('https://images.unsplash.com/photo-1667068114508-0055f7fb25a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjB3b3JzaGlwJTIwaGFuZHMlMjByYWlzZWR8ZW58MXx8fHwxNzYzNjQ0NjcyfDA&ixlib=rb-4.1.0&q=80&w=1080')`
           }}
         />
+        
+        {/* Background Video */}
+        <div className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full w-auto h-auto object-cover"
+            onLoadedData={() => {
+              setTimeout(() => setVideoLoaded(true), 500);
+            }}
+            onError={(e) => {
+              console.error('Video failed to load:', e);
+            }}
+          >
+            <source src="https://jhbpbopvzcxbfgyemhpa.supabase.co/storage/v1/object/public/UnlimitedGrace&Mercy/Church.mp4" type="video/mp4" />
+          </video>
+          {/* Black overlay */}
+          <div className="absolute inset-0 bg-black opacity-20"></div>
+        </div>
 
         {/* Hero Content */}
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
