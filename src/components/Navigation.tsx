@@ -34,13 +34,13 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-24 md:h-28">
           {/* Logo */}
-          <div className="flex items-center cursor-pointer" onClick={() => handleNavClick('home')}>
+          <div className="flex items-center cursor-pointer py-2" onClick={() => handleNavClick('home')}>
             <img
               src={churchLogo}
               alt="Unlimited Grace & Mercy Worldwide Mission Inc."
-              className="h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 object-contain"
+              className="h-16 w-16 sm:h-18 sm:w-18 md:h-20 md:w-20 object-contain"
             />
           </div>
 
