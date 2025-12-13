@@ -12,6 +12,9 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const desktopLinkBase =
+    "relative pb-1 font-['Montserrat'] transition-colors after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-full after:scale-x-0 after:bg-[var(--gold)] after:origin-left after:transition-transform after:duration-200 hover:after:scale-x-100";
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -26,6 +29,12 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
     }
     setMobileMenuOpen(false);
   };
+
+  const desktopLinkColor =
+    currentPage === 'home' && !isScrolled ? 'text-white' : isScrolled ? 'text-white' : 'text-black';
+
+  const getDesktopLinkClass = (page: string) =>
+    `${desktopLinkBase} ${desktopLinkColor} ${currentPage === page ? 'text-[var(--gold)] after:scale-x-100' : 'hover:text-[var(--gold)]'}`;
 
   return (
     <nav
@@ -48,65 +57,49 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
           <div className="hidden md:flex items-center space-x-6 bg-[rgba(0,0,0,0)]">
             <button
               onClick={() => handleNavClick('home')}
-              className={`${currentPage === 'home' && !isScrolled ? 'text-white' : isScrolled ? 'text-white' : 'text-black'} hover:text-[var(--gold)] transition-colors font-['Montserrat'] ${
-                currentPage === 'home' ? 'text-[var(--gold)]' : ''
-              }`}
+              className={getDesktopLinkClass('home')}
             >
               Home
             </button>
             <button
               onClick={() => handleNavClick('about')}
-              className={`${currentPage === 'home' && !isScrolled ? 'text-white' : isScrolled ? 'text-white' : 'text-black'} hover:text-[var(--gold)] transition-colors font-['Montserrat'] ${
-                currentPage === 'about' ? 'text-[var(--gold)]' : ''
-              }`}
+              className={getDesktopLinkClass('about')}
             >
               About
             </button>
             <button
               onClick={() => handleNavClick('watch-live')}
-              className={`${currentPage === 'home' && !isScrolled ? 'text-white' : isScrolled ? 'text-white' : 'text-black'} hover:text-[var(--gold)] transition-colors font-['Montserrat'] ${
-                currentPage === 'watch-live' ? 'text-[var(--gold)]' : ''
-              }`}
+              className={getDesktopLinkClass('watch-live')}
             >
               Watch Live
             </button>
             <button
               onClick={() => handleNavClick('events')}
-              className={`${currentPage === 'home' && !isScrolled ? 'text-white' : isScrolled ? 'text-white' : 'text-black'} hover:text-[var(--gold)] transition-colors font-['Montserrat'] ${
-                currentPage === 'events' ? 'text-[var(--gold)]' : ''
-              }`}
+              className={getDesktopLinkClass('events')}
             >
               Events
             </button>
             <button
               onClick={() => handleNavClick('event-gallery')}
-              className={`${currentPage === 'home' && !isScrolled ? 'text-white' : isScrolled ? 'text-white' : 'text-black'} hover:text-[var(--gold)] transition-colors font-['Montserrat'] ${
-                currentPage === 'event-gallery' ? 'text-[var(--gold)]' : ''
-              }`}
+              className={getDesktopLinkClass('event-gallery')}
             >
               Gallery
             </button>
             <button
               onClick={() => handleNavClick('sermons')}
-              className={`${currentPage === 'home' && !isScrolled ? 'text-white' : isScrolled ? 'text-white' : 'text-black'} hover:text-[var(--gold)] transition-colors font-['Montserrat'] ${
-                currentPage === 'sermons' ? 'text-[var(--gold)]' : ''
-              }`}
+              className={getDesktopLinkClass('sermons')}
             >
               Sermons
             </button>
             <button
               onClick={() => handleNavClick('resources')}
-              className={`${currentPage === 'home' && !isScrolled ? 'text-white' : isScrolled ? 'text-white' : 'text-black'} hover:text-[var(--gold)] transition-colors font-['Montserrat'] ${
-                currentPage === 'resources' ? 'text-[var(--gold)]' : ''
-              }`}
+              className={getDesktopLinkClass('resources')}
             >
               Resources
             </button>
             <button
               onClick={() => handleNavClick('service-times')}
-              className={`${currentPage === 'home' && !isScrolled ? 'text-white' : isScrolled ? 'text-white' : 'text-black'} hover:text-[var(--gold)] transition-colors font-['Montserrat'] ${
-                currentPage === 'service-times' ? 'text-[var(--gold)]' : ''
-              }`}
+              className={getDesktopLinkClass('service-times')}
             >
               Service Times
             </button>

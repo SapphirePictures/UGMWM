@@ -12,16 +12,12 @@ import {
   Mail,
   FileText,
   ChevronRight,
-  Download,
   RefreshCw,
   Loader2,
   Video,
   Home,
   Radio,
-  Image as ImageIcon,
-  Menu,
-  X,
-  ChevronLeft
+  Image as ImageIcon
 } from 'lucide-react';
 import { AdminVolunteersPage } from './AdminVolunteersPage';
 import { SetupInstructionsPage } from './SetupInstructionsPage';
@@ -49,14 +45,11 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
   });
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [forceReset, setForceReset] = useState(0);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Reset to overview when component mounts or forceReset changes
   useEffect(() => {
     setActiveSection('overview');
-    setForceReset(Date.now());
   }, []);
 
   // Fetch statistics
@@ -128,6 +121,23 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
     { id: 'events', label: 'Events', icon: Calendar },
     { id: 'event-gallery', label: 'Event Gallery', icon: ImageIcon },
   ];
+
+  const desktopNavBase =
+    "relative flex items-center gap-2 px-3 py-2 rounded-full text-sm font-['Montserrat'] transition-all after:absolute after:left-3 after:right-3 after:bottom-1 after:h-0.5 after:scale-x-0 after:origin-left after:bg-[var(--gold)] after:transition-transform after:duration-200";
+
+  const getDesktopNavClass = (sectionId: string) => {
+    const isActive = activeSection === sectionId;
+    if (isActive) {
+      return `${desktopNavBase} bg-[var(--wine)] text-white shadow-sm after:scale-x-100`;
+    }
+    return `${desktopNavBase} bg-gray-100 text-gray-700 hover:bg-gray-200 hover:after:scale-x-100`;
+  };
+
+  const handleSectionChange = (sectionId: string) => {
+    setActiveSection(sectionId);
+    setIsMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Render different sections based on active selection
   const renderContent = () => {
@@ -259,7 +269,7 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card
               className="p-6 hover:shadow-lg transition-all cursor-pointer rounded-2xl group"
-              onClick={() => setActiveSection('volunteers')}
+              onClick={() => handleSectionChange('volunteers')}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -281,7 +291,7 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
 
             <Card
               className="p-6 hover:shadow-lg transition-all cursor-pointer rounded-2xl group"
-              onClick={() => setActiveSection('homepage-events')}
+              onClick={() => handleSectionChange('homepage-events')}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -303,7 +313,7 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
 
             <Card
               className="p-6 hover:shadow-lg transition-all cursor-pointer rounded-2xl group"
-              onClick={() => setActiveSection('setup')}
+              onClick={() => handleSectionChange('setup')}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -404,106 +414,88 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
-      <div className="flex">
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="lg:hidden fixed top-24 left-4 z-50 bg-[var(--wine)] text-white p-2 rounded-lg shadow-lg"
-        >
-          {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6">
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4 px-4 md:px-6 py-4">
+            <div>
+              <p className="font-['Montserrat'] text-lg text-[var(--wine)]">Admin Panel</p>
+              <p className="text-gray-600 font-['Merriweather'] text-sm">Manage your church website</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 border-[var(--wine)] text-[var(--wine)] hover:bg-[var(--wine)]/10"
+                onClick={() => setShowPasswordModal(true)}
+              >
+                <Key className="w-4 h-4" />
+                <span>Change Password</span>
+              </Button>
+              <Button
+                className="flex items-center gap-2 bg-[var(--wine)] hover:bg-[var(--wine-dark)] text-white"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </Button>
+            </div>
+          </div>
 
-        {/* Mobile Overlay */}
-        {isSidebarOpen && (
-          <div
-            className="lg:hidden fixed inset-0 bg-black/50 z-30 top-20"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
-
-        {/* Sidebar Navigation */}
-        <div
-          className={`${
-            isSidebarCollapsed ? 'w-20' : 'w-64'
-          } bg-white border-r border-gray-200 min-h-screen fixed left-0 top-20 shadow-sm transition-all duration-300 z-40 ${
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } lg:translate-x-0`}
-        >
-          <div className="p-6 relative">
-            {/* Collapse Button - Desktop Only */}
-            <button
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="hidden lg:flex absolute -right-3 top-4 bg-[var(--wine)] text-white border-2 border-white rounded-full p-2 shadow-lg hover:bg-[var(--wine-dark)] transition-colors z-50"
-            >
-              <ChevronLeft className={`w-5 h-5 transition-transform ${isSidebarCollapsed ? 'rotate-180' : ''}`} />
-            </button>
-
-            {!isSidebarCollapsed && (
-              <div className="mb-8">
-                <h2 className="font-['Montserrat'] text-lg text-[var(--wine)] mb-2">
-                  Admin Panel
-                </h2>
-                <p className="text-gray-600 font-['Merriweather'] text-sm">
-                  Manage your church website
-                </p>
-              </div>
-            )}
-
-            <nav className="space-y-2">
+          <div className="px-4 md:px-6 pb-4 border-t border-gray-100">
+            <div className="hidden lg:flex flex-wrap items-center gap-2">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <button
                     key={item.id}
-                    onClick={() => {
-                      setActiveSection(item.id);
-                      setIsSidebarOpen(false);
-                    }}
-                    className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-xl transition-all font-['Montserrat'] ${
-                      activeSection === item.id
-                        ? 'bg-[var(--wine)] text-white shadow-md'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                    title={isSidebarCollapsed ? item.label : ''}
+                    onClick={() => handleSectionChange(item.id)}
+                    className={getDesktopNavClass(item.id)}
                   >
-                    <Icon className="w-5 h-5 flex-shrink-0" />
-                    {!isSidebarCollapsed && <span>{item.label}</span>}
+                    <Icon className="w-4 h-4" />
+                    <span>{item.label}</span>
                   </button>
                 );
               })}
-            </nav>
+            </div>
 
-            <div className={`mt-8 pt-8 border-t border-gray-200 space-y-2 ${isSidebarCollapsed ? 'border-t-0 pt-0' : ''}`}>
+            <div className="lg:hidden">
               <button
-                onClick={() => {
-                  setShowPasswordModal(true);
-                  setIsSidebarOpen(false);
-                }}
-                className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-xl transition-all font-['Montserrat'] text-gray-600 hover:bg-gray-100`}
-                title={isSidebarCollapsed ? 'Change Password' : ''}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-gray-100 text-gray-800 font-['Montserrat']"
               >
-                <Key className="w-5 h-5 flex-shrink-0" />
-                {!isSidebarCollapsed && <span>Change Password</span>}
+                <span>{navigationItems.find((item) => item.id === activeSection)?.label || 'Select Section'}</span>
+                <ChevronRight className={`w-4 h-4 transition-transform ${isMobileMenuOpen ? 'rotate-90' : ''}`} />
               </button>
-              <button
-                onClick={handleLogout}
-                className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-xl transition-all font-['Montserrat'] text-red-600 hover:bg-red-50`}
-                title={isSidebarCollapsed ? 'Logout' : ''}
-              >
-                <LogOut className="w-5 h-5 flex-shrink-0" />
-                {!isSidebarCollapsed && <span>Logout</span>}
-              </button>
+              {isMobileMenuOpen && (
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {navigationItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeSection === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleSectionChange(item.id)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-['Montserrat'] transition-all ${
+                          isActive
+                            ? 'bg-[var(--wine)] text-white shadow-sm'
+                            : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Main Content Area */}
-        <div className={`flex-1 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'} transition-all duration-300 p-4 md:p-8`}>
+        <div className="space-y-6">
           {renderContent()}
         </div>
       </div>
 
-      {/* Password Change Modal */}
       {showPasswordModal && (
         <ChangePasswordModal onClose={() => setShowPasswordModal(false)} />
       )}
