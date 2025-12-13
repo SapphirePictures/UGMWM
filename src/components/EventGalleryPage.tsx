@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Calendar, Image as ImageIcon, Video, Loader2, X, Play } from 'lucide-react';
 import { getOptimizedImageUrl, getImageSrcSet } from '../utils/storage';
+import { projectId, publicAnonKey } from '../utils/supabase/info';
 
 interface MediaItem {
   id: string;
@@ -33,6 +34,8 @@ export function EventGalleryPage({ onNavigate }: EventGalleryPageProps) {
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  const apiBase = `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76`;
+
   useEffect(() => {
     fetchGalleries();
   }, []);
@@ -40,20 +43,43 @@ export function EventGalleryPage({ onNavigate }: EventGalleryPageProps) {
   const fetchGalleries = async () => {
     setLoading(true);
     try {
-      // Load from localStorage
+      // 1) Try Supabase function (shared for all users)
+      const res = await fetch(`${apiBase}/event-galleries`, {
+        headers: {
+          Authorization: `Bearer ${publicAnonKey}`,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const remote = data?.galleries || data || [];
+        const sorted = remote.sort(
+          (a: EventGallery, b: EventGallery) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()
+        );
+        setGalleries(sorted);
+        localStorage.setItem('eventGalleries', JSON.stringify(sorted)); // cache for offline
+        return;
+      }
+
+      console.warn('Falling back to cached galleries; Supabase returned', res.status);
+    } catch (error) {
+      console.warn('Supabase gallery fetch failed, using cache', error);
+    }
+
+    // 2) Fallback to local cache
+    try {
       const stored = localStorage.getItem('eventGalleries');
       if (stored) {
-        const allGalleries = JSON.parse(stored);
-        // Sort by date, newest first
-        const sortedGalleries = allGalleries.sort((a: EventGallery, b: EventGallery) => 
-          new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()
+        const cached = JSON.parse(stored);
+        const sorted = cached.sort(
+          (a: EventGallery, b: EventGallery) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()
         );
-        setGalleries(sortedGalleries);
+        setGalleries(sorted);
       } else {
         setGalleries([]);
       }
-    } catch (error) {
-      console.error('Error loading galleries:', error);
+    } catch (cacheErr) {
+      console.error('Error reading cached galleries:', cacheErr);
       setGalleries([]);
     } finally {
       setLoading(false);
@@ -194,9 +220,8 @@ export function EventGalleryPage({ onNavigate }: EventGalleryPageProps) {
                         <div className="relative aspect-square">
                           {media.type === 'image' ? (
                             <img
-                              src={getOptimizedImageUrl(media.url, { width: 400, height: 400, quality: 85, format: 'webp', resize: 'cover' })}
-                              srcSet={getImageSrcSet(media.url)}
-                              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                              src={media.url}
+                              srcSet=""
                               alt={media.caption || 'Event photo'}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                               loading="lazy"
