@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from './ui/button';
+import churchLogo from 'figma:asset/a02d98e1848270468d8689a4d10185e04425697c.png';
 
 interface NavigationProps {
   currentPage?: string;
@@ -36,16 +37,11 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex items-center cursor-pointer" onClick={() => handleNavClick('home')}>
-            <div className="flex flex-col">
-              <span className={`font-['Montserrat'] font-semibold sm:text-base leading-tight text-[20px] ${
-                currentPage === 'home' || isScrolled ? 'text-white' : 'text-white md:text-white max-md:text-black'
-              }`}>
-                Unlimited Grace and Mercy
-              </span>
-              <span className={`font-['Montserrat'] text-xs sm:text-sm text-[var(--gold)]`}>
-                Worldwide Mission Inc.
-              </span>
-            </div>
+            <img
+              src={churchLogo}
+              alt="Unlimited Grace & Mercy Worldwide Mission Inc."
+              className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
+            />
           </div>
 
           {/* Desktop Navigation */}
