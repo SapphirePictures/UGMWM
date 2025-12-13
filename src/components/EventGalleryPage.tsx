@@ -272,63 +272,74 @@ export function EventGalleryPage({ onNavigate }: EventGalleryPageProps) {
 
       {/* Lightbox */}
       {selectedMedia && selectedGallery && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 sm:p-6">
           <button
             onClick={closeLightbox}
             className="absolute top-4 right-4 text-white hover:text-[var(--gold)] transition-colors"
+            aria-label="Close"
           >
             <X className="w-8 h-8" />
           </button>
 
-          {selectedGallery.media.length > 1 && (
-            <>
+          <div className="w-full max-w-6xl grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 sm:gap-6">
+            {selectedGallery.media.length > 1 ? (
               <button
                 onClick={prevMedia}
-                className="absolute left-4 text-white hover:text-[var(--gold)] transition-colors"
+                className="shrink-0 text-white hover:text-[var(--gold)] transition-colors"
+                aria-label="Previous"
               >
-                <div className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
                   ‹
                 </div>
               </button>
+            ) : (
+              <div className="w-10 h-10 sm:w-12 sm:h-12" aria-hidden />
+            )}
+
+            <div className="relative flex justify-center">
+              {selectedMedia.type === 'image' ? (
+                <img
+                  src={selectedMedia.url}
+                  alt={selectedMedia.caption || 'Event photo'}
+                  className="max-h-[80vh] w-auto max-w-full object-contain"
+                />
+              ) : (
+                <div className="aspect-video w-full max-w-4xl">
+                  <iframe
+                    src={getVideoEmbedUrl(selectedMedia.url)}
+                    className="w-full h-full"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen"
+                    allowFullScreen
+                    title={selectedMedia.caption || 'Event video'}
+                  ></iframe>
+                </div>
+              )}
+
+              {selectedMedia.caption && (
+                <div className="mt-4 text-center">
+                  <p className="text-white font-['Merriweather'] text-lg">
+                    {selectedMedia.caption}
+                  </p>
+                  <p className="text-gray-400 font-['Montserrat'] text-sm mt-2">
+                    {lightboxIndex + 1} / {selectedGallery.media.length}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {selectedGallery.media.length > 1 ? (
               <button
                 onClick={nextMedia}
-                className="absolute right-4 text-white hover:text-[var(--gold)] transition-colors"
+                className="shrink-0 text-white hover:text-[var(--gold)] transition-colors"
+                aria-label="Next"
               >
-                <div className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
                   ›
                 </div>
               </button>
-            </>
-          )}
-
-          <div className="max-w-6xl w-full">
-            {selectedMedia.type === 'image' ? (
-              <img
-                src={selectedMedia.url}
-                alt={selectedMedia.caption || 'Event photo'}
-                className="w-full h-auto max-h-[80vh] object-contain"
-              />
             ) : (
-              <div className="aspect-video w-full">
-                <iframe
-                  src={getVideoEmbedUrl(selectedMedia.url)}
-                  className="w-full h-full"
-                  frameBorder="0"
-                  allow="autoplay; fullscreen"
-                  allowFullScreen
-                  title={selectedMedia.caption || 'Event video'}
-                ></iframe>
-              </div>
-            )}
-            {selectedMedia.caption && (
-              <div className="mt-4 text-center">
-                <p className="text-white font-['Merriweather'] text-lg">
-                  {selectedMedia.caption}
-                </p>
-                <p className="text-gray-400 font-['Montserrat'] text-sm mt-2">
-                  {lightboxIndex + 1} / {selectedGallery.media.length}
-                </p>
-              </div>
+              <div className="w-10 h-10 sm:w-12 sm:h-12" aria-hidden />
             )}
           </div>
         </div>

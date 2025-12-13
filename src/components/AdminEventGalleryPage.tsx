@@ -8,6 +8,10 @@ import { Plus, Trash2, Edit, Image as ImageIcon, Loader2, Calendar, Video, X } f
 import { toast } from 'sonner';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
+import { createClient } from '@supabase/supabase-js';
+
+const apiBase = `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76`;
+const supabase = createClient(`https://${projectId}.supabase.co`, publicAnonKey);
 
 interface MediaItem {
   id: string;
@@ -43,6 +47,9 @@ export function AdminEventGalleryPage() {
   const [newMediaCaption, setNewMediaCaption] = useState('');
   const [newMediaType, setNewMediaType] = useState<'image' | 'video'>('image');
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const EVENT_GALLERY_BUCKET = 'event-gallery';
 
   useEffect(() => {
     fetchGalleries();
@@ -51,14 +58,35 @@ export function AdminEventGalleryPage() {
   const fetchGalleries = async () => {
     setLoading(true);
     try {
-      // Load from localStorage
-      const stored = localStorage.getItem('eventGalleries');
-      if (stored) {
-        setGalleries(JSON.parse(stored));
+      const res = await fetch(`${apiBase}/event-galleries`, {
+        headers: {
+          Authorization: `Bearer ${publicAnonKey}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Supabase responded with ${res.status}`);
       }
+
+      const data = await res.json();
+      const remote = data?.galleries || [];
+      const sorted = remote.sort(
+        (a: EventGallery, b: EventGallery) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()
+      );
+      setGalleries(sorted);
+      localStorage.setItem('eventGalleries', JSON.stringify(sorted));
     } catch (error) {
-      console.error('Error loading galleries:', error);
-      toast.error('Failed to load event galleries');
+      console.warn('Falling back to cached galleries:', error);
+      const cached = localStorage.getItem('eventGalleries');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const sorted = parsed.sort(
+          (a: EventGallery, b: EventGallery) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()
+        );
+        setGalleries(sorted);
+      } else {
+        toast.error('Failed to load event galleries');
+      }
     } finally {
       setLoading(false);
     }
@@ -124,37 +152,40 @@ export function AdminEventGalleryPage() {
 
     setIsSaving(true);
     try {
-      // Get existing galleries from localStorage
-      const stored = localStorage.getItem('eventGalleries');
-      const existingGalleries: EventGallery[] = stored ? JSON.parse(stored) : [];
+      const payload = {
+        ...formData,
+        media: mediaItems,
+      };
 
-      if (editingGallery) {
-        // Update existing gallery
-        const updatedGalleries = existingGalleries.map(g =>
-          g.id === editingGallery.id
-            ? {
-                ...g,
-                ...formData,
-                media: mediaItems,
-                updatedAt: new Date().toISOString(),
-              }
-            : g
-        );
-        localStorage.setItem('eventGalleries', JSON.stringify(updatedGalleries));
-        toast.success('Gallery updated successfully');
-      } else {
-        // Create new gallery
-        const newGallery: EventGallery = {
-          id: Date.now().toString(),
-          ...formData,
-          media: mediaItems,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        existingGalleries.push(newGallery);
-        localStorage.setItem('eventGalleries', JSON.stringify(existingGalleries));
-        toast.success('Gallery created successfully');
+      const endpoint = editingGallery
+        ? `${apiBase}/event-galleries/${editingGallery.id}`
+        : `${apiBase}/event-galleries`;
+
+      const res = await fetch(endpoint, {
+        method: editingGallery ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${publicAnonKey}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Supabase responded with ${res.status}`);
       }
+
+      const data = await res.json();
+      const updated = data?.gallery as EventGallery | undefined;
+
+      if (updated) {
+        const nextGalleries = editingGallery
+          ? galleries.map(g => (g.id === updated.id ? updated : g))
+          : [...galleries, updated];
+        setGalleries(nextGalleries);
+        localStorage.setItem('eventGalleries', JSON.stringify(nextGalleries));
+      }
+
+      toast.success(editingGallery ? 'Gallery updated successfully' : 'Gallery created successfully');
 
       setShowModal(false);
       fetchGalleries();
@@ -170,12 +201,19 @@ export function AdminEventGalleryPage() {
     if (!window.confirm('Are you sure you want to delete this event gallery?')) return;
 
     try {
-      // Get existing galleries from localStorage
-      const stored = localStorage.getItem('eventGalleries');
-      const existingGalleries: EventGallery[] = stored ? JSON.parse(stored) : [];
-      
-      // Filter out the deleted gallery
-      const updatedGalleries = existingGalleries.filter(g => g.id !== id);
+      const res = await fetch(`${apiBase}/event-galleries/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${publicAnonKey}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Supabase responded with ${res.status}`);
+      }
+
+      const updatedGalleries = galleries.filter(g => g.id !== id);
+      setGalleries(updatedGalleries);
       localStorage.setItem('eventGalleries', JSON.stringify(updatedGalleries));
 
       toast.success('Gallery deleted successfully');
@@ -395,6 +433,77 @@ export function AdminEventGalleryPage() {
                 </div>
                 
                 <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Input
+                      type="file"
+                      accept={newMediaType === 'image' ? 'image/*' : 'video/*'}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        setIsUploading(true);
+                        const loadingToast = toast.loading('Uploading to Supabase...');
+                        try {
+                          const fileExt = file.name.split('.').pop();
+                          const sanitizedName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '-');
+                          const path = `event-gallery/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${fileExt || 'file'}`;
+                          const { error: uploadError } = await supabase.storage
+                            .from(EVENT_GALLERY_BUCKET)
+                            .upload(path, file, {
+                              cacheControl: '3600',
+                              upsert: false,
+                            });
+
+                          if (uploadError) {
+                            throw uploadError;
+                          }
+
+                          const { data: publicData } = supabase.storage
+                            .from(EVENT_GALLERY_BUCKET)
+                            .getPublicUrl(path);
+
+                          const publicUrl = publicData?.publicUrl;
+                          if (!publicUrl) {
+                            throw new Error('Could not resolve public URL');
+                          }
+
+                          const newItem: MediaItem = {
+                            id: Date.now().toString(),
+                            type: newMediaType,
+                            url: publicUrl,
+                            caption: newMediaCaption || sanitizedName,
+                          };
+
+                          setMediaItems((prev) => [...prev, newItem]);
+                          setNewMediaUrl('');
+                          setNewMediaCaption('');
+                          toast.success('Uploaded and added to gallery');
+                        } catch (uploadErr) {
+                          console.error('Upload failed:', uploadErr);
+                          toast.error('Upload failed. Is the "event-gallery" bucket public?');
+                        } finally {
+                          toast.dismiss(loadingToast);
+                          setIsUploading(false);
+                          e.target.value = '';
+                        }
+                      }}
+                      disabled={isUploading}
+                    />
+                    {isUploading && <Loader2 className="w-5 h-5 animate-spin text-[var(--wine)]" />}
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Uploads go to Supabase storage bucket "event-gallery". For videos, prefer links if files are large.
+                  </p>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-gray-50 text-gray-500 font-['Montserrat']">OR</span>
+                    </div>
+                  </div>
+
                   <Input
                     value={newMediaUrl}
                     onChange={(e) => setNewMediaUrl(e.target.value)}
@@ -409,6 +518,7 @@ export function AdminEventGalleryPage() {
                     onClick={handleAddMedia}
                     type="button"
                     className="bg-[var(--wine)] text-white hover:bg-[var(--wine-dark)] font-['Montserrat']"
+                    disabled={isUploading}
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add {newMediaType === 'image' ? 'Photo' : 'Video'}
