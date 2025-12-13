@@ -18,7 +18,10 @@ import {
   Video,
   Home,
   Radio,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Menu,
+  X,
+  ChevronLeft
 } from 'lucide-react';
 import { AdminVolunteersPage } from './AdminVolunteersPage';
 import { SetupInstructionsPage } from './SetupInstructionsPage';
@@ -47,6 +50,8 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [forceReset, setForceReset] = useState(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Reset to overview when component mounts or forceReset changes
   useEffect(() => {
@@ -400,17 +405,49 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
       <div className="flex">
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="lg:hidden fixed top-24 left-4 z-50 bg-[var(--wine)] text-white p-2 rounded-lg shadow-lg"
+        >
+          {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+
+        {/* Mobile Overlay */}
+        {isSidebarOpen && (
+          <div
+            className="lg:hidden fixed inset-0 bg-black/50 z-30 top-20"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
         {/* Sidebar Navigation */}
-        <div className="w-64 bg-white border-r border-gray-200 min-h-screen fixed left-0 top-20 shadow-sm">
+        <div
+          className={`${
+            isSidebarCollapsed ? 'w-20' : 'w-64'
+          } bg-white border-r border-gray-200 min-h-screen fixed left-0 top-20 shadow-sm transition-all duration-300 z-40 ${
+            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } lg:translate-x-0`}
+        >
           <div className="p-6">
-            <div className="mb-8">
-              <h2 className="font-['Montserrat'] text-lg text-[var(--wine)] mb-2">
-                Admin Panel
-              </h2>
-              <p className="text-gray-600 font-['Merriweather'] text-sm">
-                Manage your church website
-              </p>
-            </div>
+            {/* Collapse Button - Desktop Only */}
+            <button
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className="hidden lg:flex absolute -right-3 top-8 bg-white border border-gray-200 rounded-full p-1 shadow-md hover:bg-gray-50 transition-colors"
+            >
+              <ChevronLeft className={`w-4 h-4 text-gray-600 transition-transform ${isSidebarCollapsed ? 'rotate-180' : ''}`} />
+            </button>
+
+            {!isSidebarCollapsed && (
+              <div className="mb-8">
+                <h2 className="font-['Montserrat'] text-lg text-[var(--wine)] mb-2">
+                  Admin Panel
+                </h2>
+                <p className="text-gray-600 font-['Merriweather'] text-sm">
+                  Manage your church website
+                </p>
+              </div>
+            )}
 
             <nav className="space-y-2">
               {navigationItems.map((item) => {
@@ -418,41 +455,50 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => setActiveSection(item.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-['Montserrat'] ${
+                    onClick={() => {
+                      setActiveSection(item.id);
+                      setIsSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-xl transition-all font-['Montserrat'] ${
                       activeSection === item.id
                         ? 'bg-[var(--wine)] text-white shadow-md'
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
+                    title={isSidebarCollapsed ? item.label : ''}
                   >
-                    <Icon className="w-5 h-5" />
-                    <span>{item.label}</span>
+                    <Icon className="w-5 h-5 flex-shrink-0" />
+                    {!isSidebarCollapsed && <span>{item.label}</span>}
                   </button>
                 );
               })}
             </nav>
 
-            <div className="mt-8 pt-8 border-t border-gray-200 space-y-2">
+            <div className={`mt-8 pt-8 border-t border-gray-200 space-y-2 ${isSidebarCollapsed ? 'border-t-0 pt-0' : ''}`}>
               <button
-                onClick={() => setShowPasswordModal(true)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-['Montserrat'] text-gray-600 hover:bg-gray-100"
+                onClick={() => {
+                  setShowPasswordModal(true);
+                  setIsSidebarOpen(false);
+                }}
+                className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-xl transition-all font-['Montserrat'] text-gray-600 hover:bg-gray-100`}
+                title={isSidebarCollapsed ? 'Change Password' : ''}
               >
-                <Key className="w-5 h-5" />
-                <span>Change Password</span>
+                <Key className="w-5 h-5 flex-shrink-0" />
+                {!isSidebarCollapsed && <span>Change Password</span>}
               </button>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-['Montserrat'] text-red-600 hover:bg-red-50"
+                className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-xl transition-all font-['Montserrat'] text-red-600 hover:bg-red-50`}
+                title={isSidebarCollapsed ? 'Logout' : ''}
               >
-                <LogOut className="w-5 h-5" />
-                <span>Logout</span>
+                <LogOut className="w-5 h-5 flex-shrink-0" />
+                {!isSidebarCollapsed && <span>Logout</span>}
               </button>
             </div>
           </div>
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 ml-64 p-8">
+        <div className={`flex-1 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'} transition-all duration-300 p-4 md:p-8`}>
           {renderContent()}
         </div>
       </div>
