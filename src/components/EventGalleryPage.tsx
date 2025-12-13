@@ -200,6 +200,14 @@ export function EventGalleryPage({ onNavigate }: EventGalleryPageProps) {
                               alt={media.caption || 'Event photo'}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                               loading="lazy"
+                              onError={(e) => {
+                                const img = e.currentTarget;
+                                if (img.dataset.fallback !== 'true') {
+                                  img.dataset.fallback = 'true';
+                                  img.src = media.url;
+                                  img.srcset = '';
+                                }
+                              }}
                             />
                           ) : (
                             <div className="relative w-full h-full bg-gray-900">
