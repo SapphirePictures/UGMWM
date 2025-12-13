@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
-import { getAllEvents, getOptimizedImageUrl, getImageSrcSet } from '../utils/storage';
+import { syncEventsWithSupabase, getOptimizedImageUrl, getImageSrcSet } from '../utils/storage';
 
 interface EventsPageProps {
   onNavigate?: (page: string) => void;
@@ -79,11 +79,11 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
 
   const [allEvents, setAllEvents] = useState(defaultEvents);
 
-  // Load events from IndexedDB on component mount and when page becomes visible
+  // Load events from Supabase with IndexedDB cache on component mount and when page becomes visible
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const events = await getAllEvents();
+        const events = await syncEventsWithSupabase();
         if (events.length > 0) {
           setAllEvents(events);
         } else {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Calendar, Clock, MapPin, ArrowLeft } from 'lucide-react';
-import { getAllEvents } from '../utils/storage';
+import { syncEventsWithSupabase } from '../utils/storage';
 
 interface AllEventsPageProps {
   onNavigate?: (page: string) => void;
@@ -11,11 +11,11 @@ interface AllEventsPageProps {
 export function AllEventsPage({ onNavigate }: AllEventsPageProps) {
   const [allEvents, setAllEvents] = useState<any[]>([]);
 
-  // Load events from IndexedDB on component mount
+  // Load events from Supabase with IndexedDB cache on component mount
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const events = await getAllEvents();
+        const events = await syncEventsWithSupabase();
         setAllEvents(events);
       } catch (error) {
         console.error('Error loading events:', error);

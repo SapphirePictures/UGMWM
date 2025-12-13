@@ -146,16 +146,18 @@ export function HomePage({ onNavigate }: HomePageProps) {
             }}
             onError={(e) => {
               console.error('Video failed to load:', e);
+              console.error('Video src:', e.currentTarget.currentSrc);
             }}
           >
-            <source src="https://jhbpbopvzcxbfgyemhpa.supabase.co/storage/v1/object/public/UnlimitedGrace&Mercy/Church.mp4" type="video/mp4" />
+            <source src="https://jhbpbopvzcxbfgyemhpa.supabase.co/storage/v1/object/public/UnlimitedGrace%26Mercy/Church.mp4" type="video/mp4" />
           </video>
-          {/* Black overlay */}
-          <div className="absolute inset-0 bg-black opacity-20"></div>
         </div>
 
+        {/* Black overlay with 10% opacity - placed outside video container */}
+        <div className="absolute inset-0 bg-black/10 pointer-events-none z-[1]"></div>
+
         {/* Hero Content */}
-        <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
+        <div className="relative z-20 text-center text-white px-4 max-w-4xl mx-auto">
           {/* Church Logo */}
           <div className="flex justify-center mb-8">
             <img

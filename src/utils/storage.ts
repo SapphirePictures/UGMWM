@@ -225,3 +225,138 @@ export const migrateFromLocalStorage = async (): Promise<void> => {
     console.error('Error migrating from localStorage:', error);
   }
 };
+
+// Supabase configuration
+const SUPABASE_PROJECT_ID = 'jhbpbopvzcxbfgyemhpa';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoYnBib3B2emN4YmZneWVtaHBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MTA3MDQsImV4cCI6MjA3OTE4NjcwNH0.KiAGv6PaE1b0Sl9FPs8-2DM9M2A88YJjPBkr13c0G0Y';
+const SUPABASE_API_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/make-server-9f158f76`;
+
+// Sync events with Supabase backend
+export const syncEventsWithSupabase = async (): Promise<any[]> => {
+  try {
+    const response = await fetch(`${SUPABASE_API_URL}/events`, {
+      headers: { Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+    });
+
+    if (!response.ok) {
+      console.warn('Supabase backend not available, using local cache');
+      return await getAllEvents();
+    }
+
+    const data = await response.json();
+    const supabaseEvents = data.events || [];
+
+    // Save to IndexedDB as cache
+    await saveAllEvents(supabaseEvents);
+    
+    return supabaseEvents;
+  } catch (error) {
+    console.error('Error syncing with Supabase:', error);
+    // Fallback to local cache
+    return await getAllEvents();
+  }
+};
+
+// Create event in Supabase and sync to IndexedDB
+export const createEventWithSync = async (eventData: any): Promise<any> => {
+  try {
+    const response = await fetch(`${SUPABASE_API_URL}/events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify(eventData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create event on server');
+    }
+
+    const result = await response.json();
+    const newEvent = result.event;
+
+    // Also save to local IndexedDB cache
+    const allEvents = await getAllEvents();
+    await saveAllEvents([...allEvents, newEvent]);
+
+    return newEvent;
+  } catch (error) {
+    console.error('Error creating event with sync:', error);
+    // Fallback to local-only creation
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const event = {
+      id,
+      createdAt: now,
+      updatedAt: now,
+      ...eventData,
+    };
+    
+    const allEvents = await getAllEvents();
+    await saveAllEvents([...allEvents, event]);
+    
+    return event;
+  }
+};
+
+// Update event in Supabase and sync to IndexedDB
+export const updateEventWithSync = async (eventId: string, eventData: any): Promise<any> => {
+  try {
+    const response = await fetch(`${SUPABASE_API_URL}/events/${eventId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify(eventData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update event on server');
+    }
+
+    const result = await response.json();
+    const updatedEvent = result.event;
+
+    // Also update in local IndexedDB cache
+    const allEvents = await getAllEvents();
+    const updatedEvents = allEvents.map(e => e.id === eventId ? updatedEvent : e);
+    await saveAllEvents(updatedEvents);
+
+    return updatedEvent;
+  } catch (error) {
+    console.error('Error updating event with sync:', error);
+    // Fallback to local-only update
+    const allEvents = await getAllEvents();
+    const updatedEvents = allEvents.map(e => 
+      e.id === eventId ? { ...e, ...eventData, updatedAt: new Date().toISOString() } : e
+    );
+    await saveAllEvents(updatedEvents);
+    
+    return updatedEvents.find(e => e.id === eventId);
+  }
+};
+
+// Delete event from Supabase and IndexedDB
+export const deleteEventWithSync = async (eventId: string): Promise<void> => {
+  try {
+    const response = await fetch(`${SUPABASE_API_URL}/events/${eventId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete event on server');
+    }
+
+    // Also delete from local IndexedDB cache
+    await deleteEvent(eventId);
+  } catch (error) {
+    console.error('Error deleting event with sync:', error);
+    // Fallback to local-only deletion
+    await deleteEvent(eventId);
+  }
+};

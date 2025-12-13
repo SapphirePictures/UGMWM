@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Plus, Trash2, Edit, Calendar as CalendarIcon, Loader2, MapPin, Clock, Image as ImageIcon, Video, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
-import { getAllEvents, saveAllEvents, migrateFromLocalStorage } from '../utils/storage';
+import { syncEventsWithSupabase, createEventWithSync, updateEventWithSync, deleteEventWithSync, migrateFromLocalStorage } from '../utils/storage';
 
 interface MediaItem {
   id: string;
@@ -76,7 +76,7 @@ export function AdminEventsPage() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const events = await getAllEvents();
+      const events = await syncEventsWithSupabase();
       setEvents(events);
     } catch (error) {
       console.error('Error loading events:', error);
@@ -286,39 +286,26 @@ export function AdminEventsPage() {
 
     setIsSaving(true);
     try {
-      // Get existing events from IndexedDB
-      const existingEvents: Event[] = await getAllEvents();
-
       if (editingEvent) {
-        // Update existing event
-        const updatedEvents = existingEvents.map(e =>
-          e.id === editingEvent.id
-            ? {
-                ...e,
-                ...formData,
-                media: mediaItems,
-                updatedAt: new Date().toISOString(),
-              }
-            : e
-        );
-        
-        await saveAllEvents(updatedEvents);
-        window.dispatchEvent(new Event('localStorageUpdate'));
-        toast.success('Event updated successfully');
-      } else {
-        // Create new event
-        const newEvent: Event = {
-          id: `event-${Date.now()}`,
+        // Update existing event with Supabase sync
+        const updatedEventData = {
           ...formData,
           media: mediaItems,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
         };
-        existingEvents.push(newEvent);
         
-        await saveAllEvents(existingEvents);
+        await updateEventWithSync(editingEvent.id, updatedEventData);
         window.dispatchEvent(new Event('localStorageUpdate'));
-        toast.success('Event created successfully');
+        toast.success('Event updated successfully and synced across devices');
+      } else {
+        // Create new event with Supabase sync
+        const newEventData = {
+          ...formData,
+          media: mediaItems,
+        };
+        
+        await createEventWithSync(newEventData);
+        window.dispatchEvent(new Event('localStorageUpdate'));
+        toast.success('Event created successfully and synced across devices');
       }
 
       setShowModal(false);
@@ -335,17 +322,13 @@ export function AdminEventsPage() {
     if (!window.confirm('Are you sure you want to delete this event?')) return;
 
     try {
-      // Get existing events from IndexedDB
-      const existingEvents: Event[] = await getAllEvents();
-      
-      // Filter out the deleted event
-      const updatedEvents = existingEvents.filter(e => e.id !== id);
-      await saveAllEvents(updatedEvents);
+      // Delete event with Supabase sync
+      await deleteEventWithSync(id);
 
       // Trigger custom event for other components in same tab
       window.dispatchEvent(new Event('localStorageUpdate'));
 
-      toast.success('Event deleted successfully');
+      toast.success('Event deleted successfully and synced across devices');
       await fetchEvents();
     } catch (error) {
       console.error('Error deleting event:', error);
@@ -357,18 +340,23 @@ export function AdminEventsPage() {
     if (!window.confirm('⚠️ This will remove all uploaded images/videos from ALL events (keeping only URLs). Continue?')) return;
     
     try {
-      const events = await getAllEvents();
-      const cleanedEvents = events.map((event: Event) => ({
-        ...event,
-        // Keep only URL-based media (not base64)
-        media: event.media?.filter(m => !m.url.startsWith('data:')) || [],
-        // Keep only URL-based cover images
-        image: event.image?.startsWith('data:') ? '' : event.image,
-      }));
+      const events = await syncEventsWithSupabase();
       
-      await saveAllEvents(cleanedEvents);
+      for (const event of events) {
+        const cleanedEvent = {
+          ...event,
+          // Keep only URL-based media (not base64)
+          media: event.media?.filter(m => !m.url.startsWith('data:')) || [],
+          // Keep only URL-based cover images
+          image: event.image?.startsWith('data:') ? '' : event.image,
+        };
+        
+        // Update each event with Supabase sync
+        await updateEventWithSync(event.id, cleanedEvent);
+      }
+      
       window.dispatchEvent(new Event('localStorageUpdate'));
-      toast.success('All uploaded media cleared. Storage freed up!');
+      toast.success('All uploaded media cleared and synced across devices!');
       await fetchEvents();
     } catch (error) {
       console.error('Error clearing media:', error);
