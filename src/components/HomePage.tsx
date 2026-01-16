@@ -454,147 +454,14 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
-      {/* Sermons Section - Temporarily hidden during development 
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="font-['Montserrat'] text-3xl md:text-4xl text-[var(--wine)] mb-4">
-              Latest Sermons
-            </h2>
-            <div className="w-24 h-1 bg-[var(--gold)] mx-auto mb-4"></div>
-            <p className="text-gray-600 font-['Merriweather'] text-lg">
-              Messages to strengthen your faith
-            </p>
-          </div>
-
-          {sermons.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                {sermons.map((sermon) => (
-                  <Card
-                    key={sermon.id}
-                    className="overflow-hidden hover:shadow-xl transition-shadow duration-300 rounded-2xl cursor-pointer group"
-                    onClick={() => handleWatchSermon(sermon)}
-                  >
-                    <div className="relative h-48 bg-gradient-to-br from-[var(--wine)] to-[var(--wine-dark)]">
-                      {sermon.thumbnailUrl ? (
-                        <img
-                          src={getOptimizedImageUrl(sermon.thumbnailUrl, { width: 480, height: 320, quality: 85, format: 'webp', resize: 'cover' })}
-                          srcSet={getImageSrcSet(sermon.thumbnailUrl)}
-                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          alt={sermon.title}
-                          className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Video className="w-16 h-16 text-white opacity-30" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-14 h-14 bg-[var(--gold)] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <Play className="w-6 h-6 text-[var(--wine)] ml-1" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-6">
-                      <h3 className="font-['Montserrat'] text-lg text-[var(--wine)] mb-2 group-hover:text-[var(--gold)] transition-colors">
-                        {sermon.title}
-                      </h3>
-                      <p className="text-gray-600 font-['Merriweather'] text-sm mb-4 line-clamp-2">
-                        {sermon.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <p className="text-[var(--gold)] font-['Montserrat'] text-sm">
-                          {new Date(sermon.date).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          })}
-                        </p>
-                        {sermon.duration && (
-                          <div className="flex items-center gap-1 text-gray-500 text-sm">
-                            <Clock className="w-4 h-4" />
-                            <span className="font-['Montserrat']">{sermon.duration}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-              {/* Placeholder sermon cards when no sermons are uploaded */}
-              <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 rounded-2xl opacity-50">
-                <div className="relative h-48 bg-gradient-to-br from-[var(--wine)] to-[var(--wine-dark)]">
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Video className="w-16 h-16 text-white opacity-30" />
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-14 h-14 bg-[var(--gold)] rounded-full flex items-center justify-center">
-                      <Play className="w-6 h-6 text-[var(--wine)] ml-1" />
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="font-['Montserrat'] text-lg text-[var(--wine)] mb-2">
-                    Upload Your First Sermon
-                  </h3>
-                  <p className="text-gray-600 font-['Merriweather'] text-sm mb-4">
-                    Go to the admin dashboard to add sermons to your website.
-                  </p>
-                  <p className="text-[var(--gold)] font-['Montserrat'] text-sm">Coming Soon</p>
-                </div>
-              </Card>
-            </div>
-          )}
-
-          <div className="text-center">
-            <Button
-              onClick={() => handleNavClick('sermons')}
-              className="bg-[var(--wine)] text-white hover:bg-[var(--wine-dark)] font-['Montserrat']"
-            >
-              <Video className="mr-2 w-5 h-5" />
-              Watch Sermons
-            </Button>
-          </div>
-        </div>
-      </section>
-      */}
-
-      {/* Video Player Modal */
+      {/* Video Player Modal */}
       <VideoPlayerModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         sermon={selectedSermon}
       />
 
-      {/* Giving Section - Temporarily hidden during development 
-      <section className="py-20 bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold)]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6">
-            <Gift className="w-10 h-10 text-[var(--wine)]" />
-          </div>
-          <h2 className="font-['Montserrat'] text-3xl md:text-4xl text-[var(--wine)] mb-6">
-            Partner With Us
-          </h2>
-          <p className="text-[var(--wine-dark)] font-['Merriweather'] text-lg mb-8 max-w-2xl mx-auto">
-            Your giving helps us spread God's love and reach more souls. Together, we can make a
-            lasting impact in our community and beyond.
-          </p>
-          <Button
-            onClick={() => handleNavClick('giving')}
-            className="bg-[var(--wine)] text-white hover:bg-[var(--wine-dark)] font-['Montserrat'] text-lg px-8 py-6"
-          >
-            Give Online
-          </Button>
-        </div>
-      </section>
-      */}
-
-      {/* Join a Unit Section */
+      {/* Join a Unit Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
