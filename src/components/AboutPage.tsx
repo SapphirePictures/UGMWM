@@ -136,7 +136,8 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
         </div>
       </section>
 
-      {/* Leadership */}
+      {/* Leadership - Temporarily hidden until content is complete */}
+      {/* 
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -147,7 +148,6 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* General Overseer */}
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -173,7 +173,6 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
               </Card>
             </motion.div>
 
-            {/* Pastor */}
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -199,7 +198,6 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
               </Card>
             </motion.div>
 
-            {/* Administrator */}
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -225,6 +223,7 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
           </div>
         </div>
       </section>
+      */}
 
       {/* What We Believe */}
       <section className="py-20 bg-gray-50">

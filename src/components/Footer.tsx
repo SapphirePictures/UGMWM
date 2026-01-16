@@ -117,7 +117,7 @@ export function Footer({ onNavigate }: FooterProps) {
               <div className="flex items-center gap-2">
                 <Phone className="w-5 h-5 text-[var(--gold)] flex-shrink-0" />
                 <span className="text-white/80 font-['Merriweather']">
-                  +234 XXX XXX XXXX
+                  +234 70 0020 0099
                 </span>
               </div>
               <div className="flex items-center gap-2">

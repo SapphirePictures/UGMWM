@@ -79,6 +79,8 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
             >
               Events
             </button>
+            {/* Temporarily hidden during development */}
+            {/* 
             <button
               onClick={() => handleNavClick('event-gallery')}
               className={getDesktopLinkClass('event-gallery')}
@@ -97,6 +99,7 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
             >
               Resources
             </button>
+            */}
             <button
               onClick={() => handleNavClick('service-times')}
               className={getDesktopLinkClass('service-times')}
@@ -152,6 +155,8 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
               >
                 Events
               </button>
+              {/* Temporarily hidden during development */}
+              {/* 
               <button
                 onClick={() => handleNavClick('event-gallery')}
                 className={`text-white hover:text-[var(--gold)] transition-colors text-left font-['Montserrat'] ${
@@ -176,6 +181,7 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
               >
                 Resources
               </button>
+              */}
               <button
                 onClick={() => handleNavClick('service-times')}
                 className={`text-white hover:text-[var(--gold)] transition-colors text-left font-['Montserrat'] ${

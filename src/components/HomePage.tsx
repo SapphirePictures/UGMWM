@@ -454,7 +454,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
-      {/* Sermons Section */}
+      {/* Sermons Section - Temporarily hidden during development 
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -562,15 +562,16 @@ export function HomePage({ onNavigate }: HomePageProps) {
           </div>
         </div>
       </section>
+      */}
 
-      {/* Video Player Modal */}
+      {/* Video Player Modal */
       <VideoPlayerModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         sermon={selectedSermon}
       />
 
-      {/* Giving Section */}
+      {/* Giving Section - Temporarily hidden during development 
       <section className="py-20 bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold)]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6">
@@ -591,8 +592,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
           </Button>
         </div>
       </section>
+      */}
 
-      {/* Join a Unit Section */}
+      {/* Join a Unit Section */
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

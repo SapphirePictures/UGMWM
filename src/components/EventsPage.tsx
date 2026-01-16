@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
-import { syncEventsWithSupabase, getOptimizedImageUrl, getImageSrcSet } from '../utils/storage';
+import { getAllEvents } from '../utils/storage';
 
 interface EventsPageProps {
   onNavigate?: (page: string) => void;
@@ -79,11 +79,11 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
 
   const [allEvents, setAllEvents] = useState(defaultEvents);
 
-  // Load events from Supabase with IndexedDB cache on component mount and when page becomes visible
+  // Load events from IndexedDB on component mount and when page becomes visible
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const events = await syncEventsWithSupabase();
+        const events = await getAllEvents();
         if (events.length > 0) {
           setAllEvents(events);
         } else {
@@ -178,12 +178,9 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
                   <div className="lg:col-span-1 h-64 lg:h-auto bg-gray-200">
                     {event.image ? (
                       <img
-                        src={getOptimizedImageUrl(event.image, { width: 640, height: 480, quality: 85, format: 'webp', resize: 'cover' })}
-                        srcSet={getImageSrcSet(event.image)}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        src={event.image}
                         alt={event.title}
                         className="w-full h-full object-cover"
-                        loading="lazy"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
                           (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--wine)] to-[var(--wine-dark)]"><svg class="w-16 h-16 text-white opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>';
