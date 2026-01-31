@@ -111,7 +111,7 @@ export function Footer({ onNavigate }: FooterProps) {
               <div className="flex items-start gap-2">
                 <MapPin className="w-5 h-5 text-[var(--gold)] mt-1 flex-shrink-0" />
                 <span className="text-white/80 font-['Merriweather']">
-                  Oyo State, Nigeria
+                  NUMBER 1. UNLIMITED GRACE AND MERCY CRESCENT, Ogbomoso 210101, Oyo
                 </span>
               </div>
               <div className="flex items-center gap-2">

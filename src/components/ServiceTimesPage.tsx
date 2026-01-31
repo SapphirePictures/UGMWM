@@ -132,11 +132,11 @@ export function ServiceTimesPage({ onNavigate }: ServiceTimesPageProps) {
                   Unlimited Grace and Mercy Worldwide Mission Inc.
                 </p>
                 <p className="text-gray-600 font-['Merriweather']">
-                  No. 01 Unlimited Grace & Mercy Crescent, Welcome Area, Ogbomoso, Oyo State, Nigeria
+                  NUMBER 1. UNLIMITED GRACE AND MERCY CRESCENT, Ogbomoso 210101, Oyo
                 </p>
               </div>
               <Button 
-                onClick={() => window.open('https://www.google.com/maps/dir/?api=1&destination=No.+01+Unlimited+Grace+%26+Mercy+Crescent,+Welcome+Area,+Ogbomoso,+Oyo+State,+Nigeria', '_blank')}
+                onClick={() => window.open('https://www.google.com/maps/dir/?api=1&destination=NUMBER+1.+UNLIMITED+GRACE+AND+MERCY+CRESCENT,+Ogbomoso+210101,+Oyo', '_blank')}
                 className="bg-[var(--wine)] text-white hover:bg-[var(--wine-dark)] font-['Montserrat']"
               >
                 Get Directions
