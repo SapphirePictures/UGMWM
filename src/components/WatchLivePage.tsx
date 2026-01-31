@@ -203,64 +203,6 @@ export function WatchLivePage({ onNavigate }: WatchLivePageProps) {
                 </div>
               </Card>
             )}
-
-            {/* Recent Sermons Section */}
-            {recentSermons.length > 0 && (
-              <div>
-                <div className="text-center mb-8">
-                  <h2 className="font-['Montserrat'] text-3xl text-[var(--wine)] mb-3">
-                    Recent Sermons
-                  </h2>
-                  <p className="font-['Merriweather'] text-gray-600">
-                    Catch up on what you might have missed
-                  </p>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-8 mb-8">
-                  {recentSermons.map((sermon) => (
-                    <Card key={sermon.id} className="overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-                      <div className="relative aspect-video bg-gray-200">
-                        <img
-                          src={sermon.thumbnail}
-                          alt={sermon.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-6">
-                        <h3 className="font-['Montserrat'] text-lg text-[var(--wine)] mb-2">
-                          {sermon.title}
-                        </h3>
-                        <p className="font-['Merriweather'] text-sm text-gray-600 mb-4">
-                          {sermon.speaker} • {new Date(sermon.date).toLocaleDateString('en-US', {
-                            month: 'long',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </p>
-                        <Button
-                          onClick={() => {
-                            window.open(sermon.videoUrl, '_blank');
-                          }}
-                          className="w-full bg-[var(--wine)] text-white hover:bg-[var(--wine-dark)] font-['Montserrat']"
-                        >
-                          Watch Sermon
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-
-                <div className="text-center">
-                  <Button
-                    onClick={() => onNavigate?.('sermons')}
-                    variant="outline"
-                    className="font-['Montserrat'] border-[var(--wine)] text-[var(--wine)] hover:bg-[var(--wine)] hover:text-white"
-                  >
-                    View All Sermons
-                  </Button>
-                </div>
-              </div>
-            )}
           </>
         )}
       </div>
