@@ -15,7 +15,7 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
       <section className="relative h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1551327420-4b280d52cc68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjBjb21tdW5pdHklMjBmZWxsb3dzaGlwfGVufDF8fHx8MTc2MzM5NzczMXww&ixlib=rb-4.1.0&q=80&w=1080"
+            src="/src/assets/8f13c1881c45e0dbc04673497bba198b313dad45.png"
             alt="About Us"
             className="w-full h-full object-cover"
           />
