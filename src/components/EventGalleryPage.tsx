@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
-import { Calendar, Image as ImageIcon, Video, Loader2, X, Play } from 'lucide-react';
+import { Calendar, Image as ImageIcon, Video, Loader2, X, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getOptimizedImageUrl, getImageSrcSet } from '../utils/storage';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 
@@ -272,75 +272,72 @@ export function EventGalleryPage({ onNavigate }: EventGalleryPageProps) {
 
       {/* Lightbox */}
       {selectedMedia && selectedGallery && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
           <button
             onClick={closeLightbox}
-            className="absolute top-4 right-4 text-white hover:text-[var(--gold)] transition-colors"
+            className="absolute top-4 right-4 z-50 text-white hover:text-[var(--gold)] transition-colors"
             aria-label="Close"
           >
             <X className="w-8 h-8" />
           </button>
 
-          <div className="w-full max-w-6xl flex items-center justify-center gap-3 sm:gap-6">
-            {selectedGallery.media.length > 1 ? (
+          {/* Navigation Buttons */}
+          {selectedGallery.media.length > 1 && (
+            <>
               <button
                 onClick={prevMedia}
-                className="shrink-0 text-white hover:text-[var(--gold)] transition-colors"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-[var(--gold)] transition-colors"
                 aria-label="Previous"
               >
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
-                  ‹
+                <div className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center backdrop-blur-sm">
+                  <ChevronLeft className="w-8 h-8" />
                 </div>
               </button>
-            ) : (
-              <div className="w-10 h-10 sm:w-12 sm:h-12" aria-hidden />
-            )}
 
-            <div className="relative flex justify-center w-full max-w-[calc(100%-160px)]">
-              {selectedMedia.type === 'image' ? (
-                <img
-                  src={selectedMedia.url}
-                  alt={selectedMedia.caption || 'Event photo'}
-                  className="max-h-[80vh] w-auto max-w-full object-contain"
-                />
-              ) : (
-                <div className="aspect-video w-full max-w-4xl">
-                  <iframe
-                    src={getVideoEmbedUrl(selectedMedia.url)}
-                    className="w-full h-full"
-                    frameBorder="0"
-                    allow="autoplay; fullscreen"
-                    allowFullScreen
-                    title={selectedMedia.caption || 'Event video'}
-                  ></iframe>
-                </div>
-              )}
-
-              {selectedMedia.caption && (
-                <div className="mt-4 text-center">
-                  <p className="text-white font-['Merriweather'] text-lg">
-                    {selectedMedia.caption}
-                  </p>
-                  <p className="text-gray-400 font-['Montserrat'] text-sm mt-2">
-                    {lightboxIndex + 1} / {selectedGallery.media.length}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {selectedGallery.media.length > 1 ? (
               <button
                 onClick={nextMedia}
-                className="shrink-0 text-white hover:text-[var(--gold)] transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-[var(--gold)] transition-colors"
                 aria-label="Next"
               >
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
-                  ›
+                <div className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center backdrop-blur-sm">
+                  <ChevronRight className="w-8 h-8" />
                 </div>
               </button>
+            </>
+          )}
+
+          {/* Media Content */}
+          <div className="relative flex flex-col items-center justify-center w-full h-full px-20 py-16">
+            {selectedMedia.type === 'image' ? (
+              <img
+                src={selectedMedia.url}
+                alt={selectedMedia.caption || 'Event photo'}
+                className="max-h-[75vh] w-auto max-w-full object-contain"
+              />
             ) : (
-              <div className="w-10 h-10 sm:w-12 sm:h-12" aria-hidden />
+              <div className="aspect-video w-full max-w-4xl">
+                <iframe
+                  src={getVideoEmbedUrl(selectedMedia.url)}
+                  className="w-full h-full"
+                  frameBorder="0"
+                  allow="autoplay; fullscreen"
+                  allowFullScreen
+                  title={selectedMedia.caption || 'Event video'}
+                ></iframe>
+              </div>
             )}
+
+            {/* Caption and Counter */}
+            <div className="absolute bottom-8 left-0 right-0 text-center px-4">
+              {selectedMedia.caption && (
+                <p className="text-white font-['Merriweather'] text-lg mb-2">
+                  {selectedMedia.caption}
+                </p>
+              )}
+              <p className="text-gray-400 font-['Montserrat'] text-sm">
+                {lightboxIndex + 1} / {selectedGallery.media.length}
+              </p>
+            </div>
           </div>
         </div>
       )}
