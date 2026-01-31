@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Heart, Target, Eye, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
+import aboutHeroImg from 'figma:asset/8f13c1881c45e0dbc04673497bba198b313dad45.png';
 
 interface AboutPageProps {
   onNavigate?: (page: string) => void;
@@ -15,7 +16,7 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
       <section className="relative h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="/src/assets/8f13c1881c45e0dbc04673497bba198b313dad45.png"
+            src={aboutHeroImg}
             alt="About Us"
             className="w-full h-full object-cover"
           />

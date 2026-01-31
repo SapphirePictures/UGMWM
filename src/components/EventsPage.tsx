@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
 import { getAllEvents } from '../utils/storage';
+import eventsHeroImg from 'figma:asset/a02d98e1848270468d8689a4d10185e04425697c.png';
 
 interface EventsPageProps {
   onNavigate?: (page: string) => void;
@@ -139,7 +140,7 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
       <section className="relative h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="/src/assets/a02d98e1848270468d8689a4d10185e04425697c.png"
+            src={eventsHeroImg}
             alt="Events"
             className="w-full h-full object-cover"
           />
