@@ -272,69 +272,75 @@ export function EventGalleryPage({ onNavigate }: EventGalleryPageProps) {
 
       {/* Lightbox */}
       {selectedMedia && selectedGallery && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-black/98 flex items-center justify-center">
+          {/* Close Button */}
           <button
             onClick={closeLightbox}
-            className="absolute top-4 right-4 z-50 text-white hover:text-[var(--gold)] transition-colors"
+            className="absolute top-6 right-6 z-50 text-white hover:text-[var(--gold)] transition-colors group"
             aria-label="Close"
           >
-            <X className="w-8 h-8" />
+            <div className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition-all">
+              <X className="w-8 h-8" />
+            </div>
           </button>
 
-          {/* Navigation Buttons */}
+          {/* Previous Button */}
           {selectedGallery.media.length > 1 && (
-            <>
-              <button
-                onClick={prevMedia}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-[var(--gold)] transition-colors"
-                aria-label="Previous"
-              >
-                <div className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center backdrop-blur-sm">
-                  <ChevronLeft className="w-8 h-8" />
-                </div>
-              </button>
-
-              <button
-                onClick={nextMedia}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white hover:text-[var(--gold)] transition-colors"
-                aria-label="Next"
-              >
-                <div className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center backdrop-blur-sm">
-                  <ChevronRight className="w-8 h-8" />
-                </div>
-              </button>
-            </>
+            <button
+              onClick={prevMedia}
+              className="fixed left-6 top-1/2 -translate-y-1/2 z-50 text-white hover:text-[var(--gold)] transition-all group"
+              aria-label="Previous"
+            >
+              <div className="w-14 h-14 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center backdrop-blur-sm shadow-lg transition-all hover:scale-110">
+                <ChevronLeft className="w-8 h-8 stroke-[3]" />
+              </div>
+            </button>
           )}
 
-          {/* Media Content */}
-          <div className="relative flex flex-col items-center justify-center w-full h-full px-20 py-16">
-            {selectedMedia.type === 'image' ? (
-              <img
-                src={selectedMedia.url}
-                alt={selectedMedia.caption || 'Event photo'}
-                className="max-h-[75vh] w-auto max-w-full object-contain"
-              />
-            ) : (
-              <div className="aspect-video w-full max-w-4xl">
-                <iframe
-                  src={getVideoEmbedUrl(selectedMedia.url)}
-                  className="w-full h-full"
-                  frameBorder="0"
-                  allow="autoplay; fullscreen"
-                  allowFullScreen
-                  title={selectedMedia.caption || 'Event video'}
-                ></iframe>
+          {/* Next Button */}
+          {selectedGallery.media.length > 1 && (
+            <button
+              onClick={nextMedia}
+              className="fixed right-6 top-1/2 -translate-y-1/2 z-50 text-white hover:text-[var(--gold)] transition-all group"
+              aria-label="Next"
+            >
+              <div className="w-14 h-14 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center backdrop-blur-sm shadow-lg transition-all hover:scale-110">
+                <ChevronRight className="w-8 h-8 stroke-[3]" />
               </div>
-            )}
+            </button>
+          )}
+
+          {/* Media Content Container */}
+          <div className="relative w-full h-full flex flex-col items-center justify-center p-4 md:p-8 lg:px-24">
+            <div className="relative max-w-7xl w-full h-full flex items-center justify-center">
+              {selectedMedia.type === 'image' ? (
+                <img
+                  src={selectedMedia.url}
+                  alt={selectedMedia.caption || 'Event photo'}
+                  className="max-h-[80vh] max-w-full w-auto h-auto object-contain rounded-lg shadow-2xl"
+                />
+              ) : (
+                <div className="aspect-video w-full max-w-5xl rounded-lg overflow-hidden shadow-2xl">
+                  <iframe
+                    src={getVideoEmbedUrl(selectedMedia.url)}
+                    className="w-full h-full"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen"
+                    allowFullScreen
+                    title={selectedMedia.caption || 'Event video'}
+                  ></iframe>
+                </div>
+              )}
+            </div>
 
             {/* Caption and Counter */}
-            <div className="absolute bottom-8 left-0 right-0 text-center px-4">
+            <div className="absolute bottom-6 left-0 right-0 text-center px-4 bg-gradient-to-t from-black/60 to-transparent pt-12 pb-6">
               {selectedMedia.caption && (
-                <p className="text-white font-['Merriweather'] text-lg mb-2">
+                <p className="text-white font-['Merriweather'] text-base md:text-lg mb-2 drop-shadow-lg">
                   {selectedMedia.caption}
                 </p>
               )}
-              <p className="text-gray-400 font-['Montserrat'] text-sm">
+              <p className="text-gray-300 font-['Montserrat'] text-sm drop-shadow-lg">
                 {lightboxIndex + 1} / {selectedGallery.media.length}
               </p>
             </div>
