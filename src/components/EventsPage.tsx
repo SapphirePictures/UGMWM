@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
 import { getAllEvents } from '../utils/storage';
-import eventsHeroImg from 'figma:asset/a02d98e1848270468d8689a4d10185e04425697c.png';
+import eventsHeroImg from '../assets/a02d98e1848270468d8689a4d10185e04425697c.png';
 
 interface EventsPageProps {
   onNavigate?: (page: string) => void;
