@@ -93,12 +93,6 @@ export function Footer({ onNavigate }: FooterProps) {
               >
                 Service Times
               </button>
-              <button
-                onClick={() => handleNavClick('giving')}
-                className="text-white/80 hover:text-[var(--gold)] transition-colors text-left font-['Montserrat']"
-              >
-                Giving
-              </button>
             </div>
           </div>
 
