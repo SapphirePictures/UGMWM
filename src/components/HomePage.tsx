@@ -219,42 +219,36 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
       {/* Home Banner Image Space */}
       <div className="px-4 sm:px-6 lg:px-8 py-20 bg-[var(--wine)]">
-        <div className="max-w-7xl mx-auto">
-      {(() => {
-        console.log('🔍 Banner Images State:', bannerImages.length, 'images');
-        console.log('📦 localStorage check:', localStorage.getItem('homepageBannerImages')?.substring(0, 50) + '...');
-        return bannerImages.length > 0 && (
-        <section className="bg-[var(--wine)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-[var(--wine-dark)] rounded-2xl p-8 md:p-12 border-2 border-[var(--gold)]">
-              <div className="relative w-full h-[200px] md:h-[240px] rounded-xl overflow-hidden">
-                <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${bannerImages.length}, 1fr)` }}>
-                  {bannerImages.map((src, index) => {
-                    console.log(`🖼️ Rendering banner image ${index + 1}:`, src.substring(0, 50) + '...');
-                    return (
-                      <div key={`banner-${index}`} className="w-full h-full">
-                        <img
-                          src={src}
-                          alt={`Homepage banner ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          loading={index === 0 ? 'eager' : 'lazy'}
-                          onError={(e) => console.error(`❌ Failed to load banner image ${index + 1}`, e)}
-                          onLoad={() => console.log(`✅ Banner image ${index + 1} loaded successfully`)}
-                        />
-                      </div>
-                    );
-                  })}
+        <div className="max-w-7xl mx-auto space-y-6">
+          {(() => {
+            console.log('🔍 Banner Images State:', bannerImages.length, 'images');
+            console.log('📦 localStorage check:', localStorage.getItem('homepageBannerImages')?.substring(0, 50) + '...');
+            return bannerImages.length > 0 && (
+              <div className="bg-[var(--wine-dark)] rounded-2xl p-8 md:p-12 border-2 border-[var(--gold)]">
+                <div className="relative w-full h-[200px] md:h-[240px] rounded-xl overflow-hidden">
+                  <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${bannerImages.length}, 1fr)` }}>
+                    {bannerImages.map((src, index) => {
+                      console.log(`🖼️ Rendering banner image ${index + 1}:`, src.substring(0, 50) + '...');
+                      return (
+                        <div key={`banner-${index}`} className="w-full h-full">
+                          <img
+                            src={src}
+                            alt={`Homepage banner ${index + 1}`}
+                            className="w-full h-full object-cover"
+                            loading={index === 0 ? 'eager' : 'lazy'}
+                            onError={(e) => console.error(`❌ Failed to load banner image ${index + 1}`, e)}
+                            onLoad={() => console.log(`✅ Banner image ${index + 1} loaded successfully`)}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-        );
-      })()}
+            );
+          })()}
 
-      {/* Upcoming Event Section */}
-      <section className="bg-[var(--wine)] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Upcoming Event Section */}
           <div
             onClick={() => handleNavClick('events')}
             className="bg-[var(--wine-dark)] rounded-2xl p-8 md:p-12 cursor-pointer hover:bg-[var(--wine-light)] transition-all duration-300 border-2 border-[var(--gold)]"
@@ -263,11 +257,11 @@ export function HomePage({ onNavigate }: HomePageProps) {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-3">
                   <Calendar className="w-6 h-6 text-[var(--gold)]" />
-                  <span className="text-[var(--gold)] font-['Montserrat']">
+                  <span className="text-[var(--gold)] font-['Montserrat'] text-white">
                     Upcoming Event
                   </span>
                 </div>
-                <h2 className="font-['Montserrat'] text-3xl md:text-4xl mb-4">
+                <h2 className="font-['Montserrat'] text-3xl md:text-4xl mb-4 text-white">
                   {homepageEvent.title}
                 </h2>
                 <p className="text-white/80 font-['Merriweather'] mb-4 text-lg">
@@ -284,8 +278,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
               </Button>
             </div>
           </div>
-        </div>
-      </section>
         </div>
       </div>
 
