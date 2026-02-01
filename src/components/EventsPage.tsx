@@ -48,34 +48,6 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
       image:
         'https://images.unsplash.com/photo-1729089049653-24312fdca908?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZW9wbGUlMjBwcmF5aW5nJTIwdG9nZXRoZXJ8ZW58MXx8fHwxNzYzMzA4NDExfDA&ixlib=rb-4.1.0&q=80&w=1080',
     },
-    {
-      id: 'womens-conf-2024',
-      title: 'Women\'s Conference',
-      date: '2024-11-15',
-      displayDate: 'November 2024',
-      description: 'A powerful gathering of women celebrating God\'s grace, featuring inspiring messages, worship, and fellowship.',
-    },
-    {
-      id: 'harvest-2024',
-      title: 'Harvest Celebration',
-      date: '2024-10-15',
-      displayDate: 'October 2024',
-      description: 'A blessed time of thanksgiving for God\'s provision and abundance.',
-    },
-    {
-      id: 'grace-conf-2024',
-      title: 'Grace Conference',
-      date: '2024-09-15',
-      displayDate: 'September 2024',
-      description: 'Three days of powerful teachings on living in God\'s grace.',
-    },
-    {
-      id: 'family-fun-2024',
-      title: 'Family Fun Day',
-      date: '2024-08-15',
-      displayDate: 'August 2024',
-      description: 'A day of fellowship, games, and bonding for families.',
-    },
   ];
 
   const [allEvents, setAllEvents] = useState(defaultEvents);

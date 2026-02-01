@@ -270,77 +270,175 @@ export function EventGalleryPage({ onNavigate }: EventGalleryPageProps) {
         </div>
       </section>
 
-      {/* Lightbox */}
+      {/* Lightbox - Simple fixed positioning */}
       {selectedMedia && selectedGallery && (
-        <div className="fixed inset-0 z-50 bg-black/98 flex items-center justify-center">
-          {/* Close Button */}
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 9999,
+          backgroundColor: 'rgba(0, 0, 0, 0.98)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          {/* Close Button - Top Right */}
           <button
             onClick={closeLightbox}
-            className="absolute top-6 right-6 z-50 text-white hover:text-[var(--gold)] transition-colors group"
-            aria-label="Close"
+            style={{
+              position: 'absolute',
+              top: '24px',
+              right: '24px',
+              zIndex: 10001,
+              background: 'rgba(255, 255, 255, 0.3)',
+              border: 'none',
+              color: 'white',
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)'
+            }}
           >
-            <div className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition-all">
-              <X className="w-8 h-8" />
-            </div>
+            <X size={24} />
           </button>
 
-          {/* Previous Button */}
+          {/* Previous Button - FAR LEFT */}
           {selectedGallery.media.length > 1 && (
             <button
               onClick={prevMedia}
-              className="fixed left-6 top-1/2 -translate-y-1/2 z-50 text-white hover:text-[var(--gold)] transition-all group"
-              aria-label="Previous"
+              style={{
+                position: 'absolute',
+                left: '20px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 10001,
+                background: 'rgba(255, 255, 255, 0.3)',
+                border: 'none',
+                color: 'white',
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(12px)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+              }}
             >
-              <div className="w-14 h-14 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center backdrop-blur-sm shadow-lg transition-all hover:scale-110">
-                <ChevronLeft className="w-8 h-8 stroke-[3]" />
-              </div>
+              <ChevronLeft size={32} strokeWidth={3} />
             </button>
           )}
 
-          {/* Next Button */}
+          {/* Next Button - FAR RIGHT */}
           {selectedGallery.media.length > 1 && (
             <button
               onClick={nextMedia}
-              className="fixed right-6 top-1/2 -translate-y-1/2 z-50 text-white hover:text-[var(--gold)] transition-all group"
-              aria-label="Next"
+              style={{
+                position: 'absolute',
+                right: '20px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 10001,
+                background: 'rgba(255, 255, 255, 0.3)',
+                border: 'none',
+                color: 'white',
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(12px)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+              }}
             >
-              <div className="w-14 h-14 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center backdrop-blur-sm shadow-lg transition-all hover:scale-110">
-                <ChevronRight className="w-8 h-8 stroke-[3]" />
-              </div>
+              <ChevronRight size={32} strokeWidth={3} />
             </button>
           )}
 
-          {/* Media Content Container */}
-          <div className="relative w-full h-full flex flex-col items-center justify-center p-4 md:p-8 lg:px-24">
-            <div className="relative max-w-7xl w-full h-full flex items-center justify-center">
-              {selectedMedia.type === 'image' ? (
-                <img
-                  src={selectedMedia.url}
-                  alt={selectedMedia.caption || 'Event photo'}
-                  className="max-h-[80vh] max-w-full w-auto h-auto object-contain rounded-lg shadow-2xl"
-                />
-              ) : (
-                <div className="aspect-video w-full max-w-5xl rounded-lg overflow-hidden shadow-2xl">
-                  <iframe
-                    src={getVideoEmbedUrl(selectedMedia.url)}
-                    className="w-full h-full"
-                    frameBorder="0"
-                    allow="autoplay; fullscreen"
-                    allowFullScreen
-                    title={selectedMedia.caption || 'Event video'}
-                  ></iframe>
-                </div>
-              )}
-            </div>
+          {/* Media Container - Centered */}
+          <div style={{
+            position: 'relative',
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+            zIndex: 10000,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {selectedMedia.type === 'image' ? (
+              <img
+                src={selectedMedia.url}
+                alt={selectedMedia.caption || 'Event photo'}
+                style={{
+                  maxHeight: '80vh',
+                  maxWidth: '100%',
+                  width: 'auto',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  borderRadius: '8px',
+                  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
+                }}
+              />
+            ) : (
+              <div style={{
+                aspectRatio: '16 / 9',
+                width: '100%',
+                maxWidth: '1000px',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
+              }}>
+                <iframe
+                  src={getVideoEmbedUrl(selectedMedia.url)}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none'
+                  }}
+                  frameBorder="0"
+                  allow="autoplay; fullscreen"
+                  allowFullScreen
+                  title={selectedMedia.caption || 'Event video'}
+                ></iframe>
+              </div>
+            )}
 
             {/* Caption and Counter */}
-            <div className="absolute bottom-6 left-0 right-0 text-center px-4 bg-gradient-to-t from-black/60 to-transparent pt-12 pb-6">
+            <div style={{
+              position: 'absolute',
+              bottom: '20px',
+              left: 0,
+              right: 0,
+              textAlign: 'center',
+              color: 'white',
+              padding: '16px'
+            }}>
               {selectedMedia.caption && (
-                <p className="text-white font-['Merriweather'] text-base md:text-lg mb-2 drop-shadow-lg">
+                <p style={{
+                  fontSize: '18px',
+                  marginBottom: '8px',
+                  textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
+                  fontFamily: 'Merriweather'
+                }}>
                   {selectedMedia.caption}
                 </p>
               )}
-              <p className="text-gray-300 font-['Montserrat'] text-sm drop-shadow-lg">
+              <p style={{
+                fontSize: '14px',
+                color: '#ddd',
+                textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
+                fontFamily: 'Montserrat'
+              }}>
                 {lightboxIndex + 1} / {selectedGallery.media.length}
               </p>
             </div>

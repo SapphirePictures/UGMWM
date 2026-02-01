@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 import { 
   LayoutDashboard, 
   Users, 
@@ -43,6 +45,7 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
     recentApplications: 0,
     emailsSent: 0,
   });
+  const [bannerImages, setBannerImages] = useState<string[]>([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -55,6 +58,16 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
   // Fetch statistics
   useEffect(() => {
     fetchStats();
+  }, []);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('homepageBannerImages');
+      const parsed = stored ? (JSON.parse(stored) as string[]) : [];
+      setBannerImages(Array.isArray(parsed) ? parsed : []);
+    } catch (error) {
+      setBannerImages([]);
+    }
   }, []);
 
   const fetchStats = async () => {
@@ -108,6 +121,81 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
         onNavigate('home');
       }
     }
+  };
+
+  const saveBannerImages = (nextImages: string[]) => {
+    console.log('💾 Saving banner images:', nextImages.length, 'images');
+    setBannerImages(nextImages);
+    localStorage.setItem('homepageBannerImages', JSON.stringify(nextImages));
+    window.dispatchEvent(new Event('localStorageUpdate'));
+    toast.success(`Banner images saved! (${nextImages.length} total)`);
+  };
+
+  const compressBannerImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      const img = new Image();
+
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.onload = (event) => {
+        img.src = event.target?.result as string;
+      };
+
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+
+        const maxWidth = 1600;
+        const maxHeight = 600;
+
+        if (width > maxWidth || height > maxHeight) {
+          const widthRatio = maxWidth / width;
+          const heightRatio = maxHeight / height;
+          const ratio = Math.min(widthRatio, heightRatio);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        const compressed = canvas.toDataURL('image/jpeg', 0.75);
+        resolve(compressed);
+      };
+
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleBannerUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const maxSizeBytes = 1024 * 1024; // 1MB recommendation
+    const nextImages = [...bannerImages];
+
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Only image files are allowed.');
+        continue;
+      }
+
+      if (file.size > maxSizeBytes) {
+        toast.info('Large image detected. Compressing before saving.');
+      }
+
+      try {
+        const compressed = await compressBannerImage(file);
+        nextImages.push(compressed);
+      } catch (error) {
+        console.error(error);
+        toast.error('Failed to upload image. Please try another file.');
+      }
+    }
+
+    saveBannerImages(nextImages);
   };
 
   const navigationItems = [
@@ -378,6 +466,56 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
             </Card>
           </div>
         </div>
+
+        {/* Homepage Banner Upload */}
+        <Card className="p-6 rounded-2xl">
+          <div className="flex items-start justify-between flex-col lg:flex-row gap-4">
+            <div>
+              <h2 className="font-['Montserrat'] text-lg text-[var(--wine)] mb-2">
+                Homepage Banner Images
+              </h2>
+              <p className="text-gray-600 font-['Merriweather'] text-sm">
+                Upload images for the homepage banner area above the events section.
+              </p>
+              <p className="text-gray-500 font-['Montserrat'] text-xs mt-2">
+                Recommended size: 1600 × 450 (wide). Max 1MB each. JPG or PNG.
+              </p>
+            </div>
+            <div className="w-full lg:max-w-xs">
+              <Label className="font-['Montserrat'] text-sm mb-2 block">
+                Upload Banner Images
+              </Label>
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => handleBannerUpload(e.target.files)}
+              />
+            </div>
+          </div>
+
+          {bannerImages.length > 0 ? (
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {bannerImages.map((src, index) => (
+                <div key={`${src}-${index}`} className="relative rounded-xl overflow-hidden border border-gray-200">
+                  <img src={src} alt={`Banner ${index + 1}`} className="w-full h-32 object-cover" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="absolute top-2 right-2 bg-white/90"
+                    onClick={() => saveBannerImages(bannerImages.filter((_, i) => i !== index))}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-gray-500 font-['Montserrat']">
+              No banner images uploaded yet. The homepage banner section will stay hidden.
+            </p>
+          )}
+        </Card>
 
         {/* System Information */}
         <Card className="p-6 bg-gray-50 rounded-2xl">

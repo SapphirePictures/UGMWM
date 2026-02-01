@@ -22,7 +22,6 @@ import { VideoPlayerModal } from './VideoPlayerModal';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { toast } from 'sonner';
 import { LiveStreamBanner } from './LiveStreamBanner';
-import { getOptimizedImageUrl, getImageSrcSet } from '../utils/storage';
 
 interface HomePageProps {
   onNavigate?: (page: string) => void;
@@ -42,6 +41,7 @@ interface Sermon {
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
+  const [bannerImages, setBannerImages] = React.useState<string[]>([]);
   const [sermons, setSermons] = React.useState<Sermon[]>([]);
   const [selectedSermon, setSelectedSermon] = React.useState<Sermon | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -53,10 +53,36 @@ export function HomePage({ onNavigate }: HomePageProps) {
     time: '8:00 AM - 2:00 PM',
   });
 
+  const loadBannerImages = React.useCallback(() => {
+    try {
+      const stored = localStorage.getItem('homepageBannerImages');
+      console.log('🔍 Loading banner images from localStorage:', stored);
+      const parsed = stored ? (JSON.parse(stored) as string[]) : [];
+      const sanitized = Array.isArray(parsed)
+        ? parsed.filter((item) => typeof item === 'string' && item.trim().length > 0)
+        : [];
+      console.log('✅ Banner images loaded:', sanitized.length, 'images');
+      setBannerImages(sanitized);
+    } catch (error) {
+      console.error('❌ Error loading banner images:', error);
+      setBannerImages([]);
+    }
+  }, []);
+
   React.useEffect(() => {
     fetchSermons();
     fetchHomepageEvent();
-  }, []);
+    loadBannerImages();
+
+    const handleBannerUpdate = () => loadBannerImages();
+    window.addEventListener('storage', handleBannerUpdate);
+    window.addEventListener('localStorageUpdate', handleBannerUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener('storage', handleBannerUpdate);
+      window.removeEventListener('localStorageUpdate', handleBannerUpdate as EventListener);
+    };
+  }, [loadBannerImages]);
 
   const fetchHomepageEvent = async () => {
     try {
@@ -191,8 +217,43 @@ export function HomePage({ onNavigate }: HomePageProps) {
       {/* Live Stream Banner */}
       <LiveStreamBanner onNavigate={onNavigate} />
 
+      {/* Home Banner Image Space */}
+      <div className="px-4 sm:px-6 lg:px-8 py-20 bg-[var(--wine)]">
+        <div className="max-w-7xl mx-auto">
+      {(() => {
+        console.log('🔍 Banner Images State:', bannerImages.length, 'images');
+        console.log('📦 localStorage check:', localStorage.getItem('homepageBannerImages')?.substring(0, 50) + '...');
+        return bannerImages.length > 0 && (
+        <section className="bg-[var(--wine)]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-[var(--wine-dark)] rounded-2xl p-8 md:p-12 border-2 border-[var(--gold)]">
+              <div className="relative w-full h-[200px] md:h-[240px] rounded-xl overflow-hidden">
+                <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${bannerImages.length}, 1fr)` }}>
+                  {bannerImages.map((src, index) => {
+                    console.log(`🖼️ Rendering banner image ${index + 1}:`, src.substring(0, 50) + '...');
+                    return (
+                      <div key={`banner-${index}`} className="w-full h-full">
+                        <img
+                          src={src}
+                          alt={`Homepage banner ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          loading={index === 0 ? 'eager' : 'lazy'}
+                          onError={(e) => console.error(`❌ Failed to load banner image ${index + 1}`, e)}
+                          onLoad={() => console.log(`✅ Banner image ${index + 1} loaded successfully`)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        );
+      })()}
+
       {/* Upcoming Event Section */}
-      <section className="py-16 bg-[var(--wine)] text-white">
+      <section className="bg-[var(--wine)] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
             onClick={() => handleNavClick('events')}
@@ -225,6 +286,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
           </div>
         </div>
       </section>
+        </div>
+      </div>
 
       {/* What We Do Section */}
       <section className="py-20 bg-white">
