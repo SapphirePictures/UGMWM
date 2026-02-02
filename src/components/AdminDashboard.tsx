@@ -129,10 +129,19 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
     
     try {
       const jsonString = JSON.stringify(nextImages);
-      console.log('📦 Total JSON string size:', jsonString.length, 'characters');
+      console.log('📦 Total JSON string size:', jsonString.length, 'characters (~' + Math.round(jsonString.length / 1024 / 1024 * 100) / 100 + 'MB)');
       
-      localStorage.setItem('homepageBannerImages', jsonString);
-      console.log('✅ Successfully saved to localStorage');
+      try {
+        localStorage.setItem('homepageBannerImages', jsonString);
+        console.log('✅ Successfully saved to localStorage');
+      } catch (storageError: any) {
+        if (storageError.name === 'QuotaExceededError') {
+          console.error('❌ localStorage quota exceeded! Size needed:', jsonString.length);
+          toast.error('⚠️ Storage full! Try deleting old images first.');
+          return;
+        }
+        throw storageError;
+      }
       
       // Verify it was saved
       const verify = localStorage.getItem('homepageBannerImages');
