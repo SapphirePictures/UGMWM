@@ -87,6 +87,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
         : [];
       
       console.log('✅ [HomePage] After sanitization:', sanitized.length, 'valid images');
+      console.log('📸 [HomePage] Setting state with images, first image length:', sanitized[0]?.length);
       setBannerImages(sanitized);
     } catch (error) {
       console.error('❌ [HomePage] Error loading banner images:', error);
@@ -239,11 +240,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
       <div className="px-4 sm:px-6 lg:px-8 py-20 bg-[var(--wine)]">
         <div className="max-w-7xl mx-auto space-y-6">
           {(() => {
-            console.log('🎬 [HomePage] Rendering banner section. Images available:', bannerImages.length);
+            console.log('🎬 [HomePage] Rendering banner section. Images in state:', bannerImages.length);
+            console.log('📋 [HomePage] Banner images state array:', bannerImages);
             if (bannerImages.length === 0) {
               console.log('⚪ [HomePage] Skipping banner render - 0 images in state');
               return null;
             }
+            console.log('✅ [HomePage] Rendering banner with', bannerImages.length, 'images');
             return (
               <div className="bg-[var(--wine-dark)] rounded-2xl p-4 md:p-12 border-2 border-[var(--gold)]">
                 {/* Mobile: Carousel, Desktop: Grid */}
