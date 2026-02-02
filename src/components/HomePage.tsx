@@ -239,16 +239,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
       {/* Home Banner Image Space */}
       <div className="px-4 sm:px-6 lg:px-8 py-20 bg-[var(--wine)]">
         <div className="max-w-7xl mx-auto space-y-6">
-          {(() => {
-            console.log('🎬 [HomePage] Rendering banner section. Images in state:', bannerImages.length);
-            console.log('📋 [HomePage] Banner images state array:', bannerImages);
-            if (bannerImages.length === 0) {
-              console.log('⚪ [HomePage] Skipping banner render - 0 images in state');
-              return null;
-            }
-            console.log('✅ [HomePage] Rendering banner with', bannerImages.length, 'images');
-            return (
-              <div className="bg-[var(--wine-dark)] rounded-2xl p-4 md:p-12 border-2 border-[var(--gold)]">
+          {!isLoadingBannerImages && bannerImages.length > 0 && (
+            <div className="bg-[var(--wine-dark)] rounded-2xl p-4 md:p-12 border-2 border-[var(--gold)]">
                 {/* Mobile: Carousel, Desktop: Grid */}
                 <div className="relative w-full h-[160px] md:h-[240px] rounded-xl overflow-hidden">
                   {/* Desktop Grid (md and above) */}
@@ -318,8 +310,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                   </div>
                 </div>
               </div>
-            );
-          })()}
+            )}
 
           {/* Upcoming Event Section */}
           <div
