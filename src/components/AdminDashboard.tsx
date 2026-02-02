@@ -31,7 +31,7 @@ import { AdminLiveStreamPage } from './AdminLiveStreamPage';
 import { AdminEventGalleryPage } from './AdminEventGalleryPage';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface AdminDashboardProps {
   onNavigate?: (page: string) => void;
