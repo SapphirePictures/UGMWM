@@ -76,11 +76,17 @@ export function HomePage({ onNavigate }: HomePageProps) {
       const data = await response.json();
       const images = data.images || [];
       console.log('✅ [HomePage] Fetched', images.length, 'banner images from server');
+      console.log('📦 [HomePage] Raw images:', images);
       
       const sanitized = Array.isArray(images)
-        ? images.filter((item) => typeof item === 'string' && item.trim().length > 0)
+        ? images.filter((item) => {
+            const isValid = typeof item === 'string' && item.length > 0;
+            if (!isValid) console.warn('⚠️ [HomePage] Filtered out invalid item:', item);
+            return isValid;
+          })
         : [];
       
+      console.log('✅ [HomePage] After sanitization:', sanitized.length, 'valid images');
       setBannerImages(sanitized);
     } catch (error) {
       console.error('❌ [HomePage] Error loading banner images:', error);
