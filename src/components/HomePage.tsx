@@ -42,6 +42,7 @@ interface Sermon {
 
 export function HomePage({ onNavigate }: HomePageProps) {
   const [bannerImages, setBannerImages] = React.useState<string[]>([]);
+  const [bannerIndex, setBannerIndex] = React.useState(0);
   const [sermons, setSermons] = React.useState<Sermon[]>([]);
   const [selectedSermon, setSelectedSermon] = React.useState<Sermon | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -222,26 +223,74 @@ export function HomePage({ onNavigate }: HomePageProps) {
         <div className="max-w-7xl mx-auto space-y-6">
           {(() => {
             console.log('🔍 Banner Images State:', bannerImages.length, 'images');
-            console.log('📦 localStorage check:', localStorage.getItem('homepageBannerImages')?.substring(0, 50) + '...');
             return bannerImages.length > 0 && (
-              <div className="bg-[var(--wine-dark)] rounded-2xl p-8 md:p-12 border-2 border-[var(--gold)]">
-                <div className="relative w-full h-[200px] md:h-[240px] rounded-xl overflow-hidden">
-                  <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${bannerImages.length}, 1fr)` }}>
-                    {bannerImages.map((src, index) => {
-                      console.log(`🖼️ Rendering banner image ${index + 1}:`, src.substring(0, 50) + '...');
-                      return (
-                        <div key={`banner-${index}`} className="w-full h-full">
-                          <img
-                            src={src}
-                            alt={`Homepage banner ${index + 1}`}
-                            className="w-full h-full object-cover"
-                            loading={index === 0 ? 'eager' : 'lazy'}
-                            onError={(e) => console.error(`❌ Failed to load banner image ${index + 1}`, e)}
-                            onLoad={() => console.log(`✅ Banner image ${index + 1} loaded successfully`)}
-                          />
+              <div className="bg-[var(--wine-dark)] rounded-2xl p-4 md:p-12 border-2 border-[var(--gold)]">
+                {/* Mobile: Carousel, Desktop: Grid */}
+                <div className="relative w-full h-[160px] md:h-[240px] rounded-xl overflow-hidden">
+                  {/* Desktop Grid (md and above) */}
+                  <div className="hidden md:grid h-full" style={{ gridTemplateColumns: `repeat(${bannerImages.length}, 1fr)` }}>
+                    {bannerImages.map((src, index) => (
+                      <div key={`banner-${index}`} className="w-full h-full">
+                        <img
+                          src={src}
+                          alt={`Homepage banner ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          loading={index === 0 ? 'eager' : 'lazy'}
+                          onError={(e) => console.error(`❌ Failed to load banner image ${index + 1}`, e)}
+                          onLoad={() => console.log(`✅ Banner image ${index + 1} loaded successfully`)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Mobile Carousel */}
+                  <div className="md:hidden relative w-full h-full">
+                    <img
+                      src={bannerImages[bannerIndex]}
+                      alt={`Homepage banner ${bannerIndex + 1}`}
+                      className="w-full h-full object-cover transition-all duration-500"
+                      loading="eager"
+                      onError={(e) => console.error(`❌ Failed to load banner image ${bannerIndex + 1}`, e)}
+                      onLoad={() => console.log(`✅ Mobile banner image ${bannerIndex + 1} loaded`)}
+                    />
+                    
+                    {/* Mobile Carousel Controls */}
+                    {bannerImages.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => setBannerIndex((bannerIndex - 1 + bannerImages.length) % bannerImages.length)}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                          aria-label="Previous image"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => setBannerIndex((bannerIndex + 1) % bannerImages.length)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                          aria-label="Next image"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                        
+                        {/* Dots Indicator */}
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                          {bannerImages.map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setBannerIndex(index)}
+                              className={`w-2 h-2 rounded-full transition-all ${
+                                index === bannerIndex ? 'bg-white w-6' : 'bg-white/50'
+                              }`}
+                              aria-label={`Go to image ${index + 1}`}
+                            />
+                          ))}
                         </div>
-                      );
-                    })}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
