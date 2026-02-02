@@ -6,6 +6,7 @@ import { createSermon, getAllSermons, getSermonById, updateSermon, deleteSermon,
 import { createResource, getAllResources, getResourceById, updateResource, deleteResource, initializeResourceBucket, incrementDownloadCount } from './resource-handler.tsx';
 import { createEvent, getAllEvents, getEventById, updateEvent, deleteEvent, getUpcomingEvents } from './event-handler.tsx';
 import homepageEventHandler from './homepage-event-handler.tsx';
+import bannerImagesHandler from './banner-images-handler.tsx';
 import { createEventGallery, getAllEventGalleries, getEventGalleryById, updateEventGallery, deleteEventGallery } from './event-gallery-handler.tsx';
 import * as kv from './kv_store.tsx';
 
@@ -345,6 +346,9 @@ app.delete('/make-server-9f158f76/events/:id', async (c) => {
 
 // ===== HOMEPAGE EVENT ROUTES =====
 app.route('/make-server-9f158f76/homepage-event', homepageEventHandler);
+
+// ===== BANNER IMAGES ROUTES =====
+app.route('/make-server-9f158f76/banner-images', bannerImagesHandler);
 
 // ===== EVENT GALLERY ROUTES =====
 

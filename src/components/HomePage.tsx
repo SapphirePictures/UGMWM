@@ -43,6 +43,7 @@ interface Sermon {
 export function HomePage({ onNavigate }: HomePageProps) {
   const [bannerImages, setBannerImages] = React.useState<string[]>([]);
   const [bannerIndex, setBannerIndex] = React.useState(0);
+  const [isLoadingBannerImages, setIsLoadingBannerImages] = React.useState(true);
   const [sermons, setSermons] = React.useState<Sermon[]>([]);
   const [selectedSermon, setSelectedSermon] = React.useState<Sermon | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -54,23 +55,38 @@ export function HomePage({ onNavigate }: HomePageProps) {
     time: '8:00 AM - 2:00 PM',
   });
 
-  const loadBannerImages = React.useCallback(() => {
+  const loadBannerImages = React.useCallback(async () => {
+    setIsLoadingBannerImages(true);
     try {
-      const stored = localStorage.getItem('homepageBannerImages');
-      console.log('🔍 [HomePage] localStorage key "homepageBannerImages":', stored ? 'EXISTS (' + stored.length + ' chars)' : 'NOT FOUND');
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/banner-images`,
+        {
+          headers: {
+            Authorization: `Bearer ${publicAnonKey}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.log('⚠️ [HomePage] Banner images endpoint not available yet');
+        setBannerImages([]);
+        return;
+      }
+
+      const data = await response.json();
+      const images = data.images || [];
+      console.log('✅ [HomePage] Fetched', images.length, 'banner images from server');
       
-      const parsed = stored ? (JSON.parse(stored) as string[]) : [];
-      console.log('📦 [HomePage] Parsed array length:', parsed.length);
-      
-      const sanitized = Array.isArray(parsed)
-        ? parsed.filter((item) => typeof item === 'string' && item.trim().length > 0)
+      const sanitized = Array.isArray(images)
+        ? images.filter((item) => typeof item === 'string' && item.trim().length > 0)
         : [];
-      console.log('✅ [HomePage] Sanitized images:', sanitized.length, 'valid images');
       
       setBannerImages(sanitized);
     } catch (error) {
       console.error('❌ [HomePage] Error loading banner images:', error);
       setBannerImages([]);
+    } finally {
+      setIsLoadingBannerImages(false);
     }
   }, []);
 
@@ -78,15 +94,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
     fetchSermons();
     fetchHomepageEvent();
     loadBannerImages();
-
-    const handleBannerUpdate = () => loadBannerImages();
-    window.addEventListener('storage', handleBannerUpdate);
-    window.addEventListener('localStorageUpdate', handleBannerUpdate as EventListener);
-
-    return () => {
-      window.removeEventListener('storage', handleBannerUpdate);
-      window.removeEventListener('localStorageUpdate', handleBannerUpdate as EventListener);
-    };
   }, [loadBannerImages]);
 
   const fetchHomepageEvent = async () => {

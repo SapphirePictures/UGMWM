@@ -46,6 +46,7 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
     emailsSent: 0,
   });
   const [bannerImages, setBannerImages] = useState<string[]>([]);
+  const [isLoadingBannerImages, setIsLoadingBannerImages] = useState(false);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -58,17 +59,36 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
   // Fetch statistics
   useEffect(() => {
     fetchStats();
+    fetchBannerImages();
   }, []);
 
-  useEffect(() => {
+  const fetchBannerImages = async () => {
+    setIsLoadingBannerImages(true);
     try {
-      const stored = localStorage.getItem('homepageBannerImages');
-      const parsed = stored ? (JSON.parse(stored) as string[]) : [];
-      setBannerImages(Array.isArray(parsed) ? parsed : []);
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/banner-images`,
+        {
+          headers: {
+            Authorization: `Bearer ${publicAnonKey}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch banner images');
+      }
+
+      const data = await response.json();
+      const images = data.images || [];
+      console.log('✅ [Admin] Fetched', images.length, 'banner images from server');
+      setBannerImages(Array.isArray(images) ? images : []);
     } catch (error) {
+      console.error('❌ [Admin] Error fetching banner images:', error);
       setBannerImages([]);
+    } finally {
+      setIsLoadingBannerImages(false);
     }
-  }, []);
+  };
 
   const fetchStats = async () => {
     setIsLoadingStats(true);
@@ -123,39 +143,36 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
     }
   };
 
-  const saveBannerImages = (nextImages: string[]) => {
+  const saveBannerImages = async (nextImages: string[]) => {
     console.log('💾 saveBannerImages called with', nextImages.length, 'images');
     console.log('📦 First image size:', nextImages[0]?.length || 0, 'characters');
     
     try {
-      const jsonString = JSON.stringify(nextImages);
-      console.log('📦 Total JSON string size:', jsonString.length, 'characters (~' + Math.round(jsonString.length / 1024 / 1024 * 100) / 100 + 'MB)');
-      
-      try {
-        localStorage.setItem('homepageBannerImages', jsonString);
-        console.log('✅ Successfully saved to localStorage');
-      } catch (storageError: any) {
-        if (storageError.name === 'QuotaExceededError') {
-          console.error('❌ localStorage quota exceeded! Size needed:', jsonString.length);
-          toast.error('⚠️ Storage full! Try deleting old images first.');
-          return;
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/banner-images`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${publicAnonKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ images: nextImages }),
         }
-        throw storageError;
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save banner images');
       }
-      
-      // Verify it was saved
-      const verify = localStorage.getItem('homepageBannerImages');
-      const verifyLength = verify ? JSON.parse(verify).length : 0;
-      console.log('🔍 Verification - localStorage contains', verifyLength, 'images');
+
+      const data = await response.json();
+      console.log('✅ Successfully saved to Supabase:', data);
       
       setBannerImages(nextImages);
-      window.dispatchEvent(new Event('localStorageUpdate'));
-      console.log('📢 Dispatched localStorageUpdate event');
-      
-      toast.success(`Banner images saved! (${nextImages.length} total)`);
-    } catch (error) {
+      toast.success(`Banner images saved! (${nextImages.length} total) - Visible to all visitors`);
+    } catch (error: any) {
       console.error('❌ Error in saveBannerImages:', error);
-      toast.error('Failed to save banner images');
+      toast.error(`Failed to save: ${error.message}`);
     }
   };
 
