@@ -549,16 +549,39 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
                 Recommended size: 1600 × 450 (wide). Max 1MB each. JPG or PNG.
               </p>
             </div>
-            <div className="w-full lg:max-w-xs">
-              <Label className="font-['Montserrat'] text-sm mb-2 block">
-                Upload Banner Images
-              </Label>
-              <Input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => handleBannerUpload(e.target.files)}
-              />
+            <div className="w-full lg:max-w-xs space-y-2">
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Label className="font-['Montserrat'] text-sm mb-2 block">
+                    Upload Banner Images
+                  </Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    disabled={isLoadingBannerImages}
+                    onChange={(e) => {
+                      console.log('📤 File input changed, files:', e.target.files?.length);
+                      handleBannerUpload(e.target.files);
+                    }}
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    console.log('🔄 Manually refreshing banner images');
+                    fetchBannerImages();
+                  }}
+                  className="self-end"
+                  title="Refresh banner images from server"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </div>
+              {isLoadingBannerImages && (
+                <p className="text-xs text-gray-500">Loading...</p>
+              )}
             </div>
           </div>
 
