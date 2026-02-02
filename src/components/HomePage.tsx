@@ -252,8 +252,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
                           alt={`Homepage banner ${index + 1}`}
                           className="w-full h-full object-cover"
                           loading={index === 0 ? 'eager' : 'lazy'}
-                          onError={(e) => console.error(`❌ [HomePage] Failed to load banner image ${index + 1}`, e)}
-                          onLoad={() => console.log(`✅ [HomePage] Banner image ${index + 1} loaded successfully`)}
+                          onError={(e) => {
+                            console.error(`❌ [HomePage] Failed to load banner image ${index + 1}`, e);
+                            console.log('Image src was:', src?.substring(0, 100));
+                          }}
+                          onLoad={() => {
+                            console.log(`✅ [HomePage] Desktop banner image ${index + 1} loaded, src length: ${src.length}`);
+                          }}
                         />
                       </div>
                     ))}
