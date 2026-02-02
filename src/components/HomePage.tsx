@@ -57,15 +57,19 @@ export function HomePage({ onNavigate }: HomePageProps) {
   const loadBannerImages = React.useCallback(() => {
     try {
       const stored = localStorage.getItem('homepageBannerImages');
-      console.log('🔍 Loading banner images from localStorage:', stored);
+      console.log('🔍 [HomePage] localStorage key "homepageBannerImages":', stored ? 'EXISTS (' + stored.length + ' chars)' : 'NOT FOUND');
+      
       const parsed = stored ? (JSON.parse(stored) as string[]) : [];
+      console.log('📦 [HomePage] Parsed array length:', parsed.length);
+      
       const sanitized = Array.isArray(parsed)
         ? parsed.filter((item) => typeof item === 'string' && item.trim().length > 0)
         : [];
-      console.log('✅ Banner images loaded:', sanitized.length, 'images');
+      console.log('✅ [HomePage] Sanitized images:', sanitized.length, 'valid images');
+      
       setBannerImages(sanitized);
     } catch (error) {
-      console.error('❌ Error loading banner images:', error);
+      console.error('❌ [HomePage] Error loading banner images:', error);
       setBannerImages([]);
     }
   }, []);
@@ -222,8 +226,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
       <div className="px-4 sm:px-6 lg:px-8 py-20 bg-[var(--wine)]">
         <div className="max-w-7xl mx-auto space-y-6">
           {(() => {
-            console.log('🔍 Banner Images State:', bannerImages.length, 'images');
-            return bannerImages.length > 0 && (
+            console.log('🎬 [HomePage] Rendering banner section. Images available:', bannerImages.length);
+            if (bannerImages.length === 0) {
+              console.log('⚪ [HomePage] Skipping banner render - 0 images in state');
+              return null;
+            }
+            return (
               <div className="bg-[var(--wine-dark)] rounded-2xl p-4 md:p-12 border-2 border-[var(--gold)]">
                 {/* Mobile: Carousel, Desktop: Grid */}
                 <div className="relative w-full h-[160px] md:h-[240px] rounded-xl overflow-hidden">
@@ -236,8 +244,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
                           alt={`Homepage banner ${index + 1}`}
                           className="w-full h-full object-cover"
                           loading={index === 0 ? 'eager' : 'lazy'}
-                          onError={(e) => console.error(`❌ Failed to load banner image ${index + 1}`, e)}
-                          onLoad={() => console.log(`✅ Banner image ${index + 1} loaded successfully`)}
+                          onError={(e) => console.error(`❌ [HomePage] Failed to load banner image ${index + 1}`, e)}
+                          onLoad={() => console.log(`✅ [HomePage] Banner image ${index + 1} loaded successfully`)}
                         />
                       </div>
                     ))}
@@ -250,8 +258,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
                       alt={`Homepage banner ${bannerIndex + 1}`}
                       className="w-full h-full object-cover transition-all duration-500"
                       loading="eager"
-                      onError={(e) => console.error(`❌ Failed to load banner image ${bannerIndex + 1}`, e)}
-                      onLoad={() => console.log(`✅ Mobile banner image ${bannerIndex + 1} loaded`)}
+                      onError={(e) => console.error(`❌ [HomePage] Failed to load mobile banner ${bannerIndex + 1}`, e)}
+                      onLoad={() => console.log(`✅ [HomePage] Mobile banner image ${bannerIndex + 1} loaded`)}
                     />
                     
                     {/* Mobile Carousel Controls */}

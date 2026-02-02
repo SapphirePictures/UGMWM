@@ -124,25 +124,53 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
   };
 
   const saveBannerImages = (nextImages: string[]) => {
-    console.log('💾 Saving banner images:', nextImages.length, 'images');
-    setBannerImages(nextImages);
-    localStorage.setItem('homepageBannerImages', JSON.stringify(nextImages));
-    window.dispatchEvent(new Event('localStorageUpdate'));
-    toast.success(`Banner images saved! (${nextImages.length} total)`);
+    console.log('💾 saveBannerImages called with', nextImages.length, 'images');
+    console.log('📦 First image size:', nextImages[0]?.length || 0, 'characters');
+    
+    try {
+      const jsonString = JSON.stringify(nextImages);
+      console.log('📦 Total JSON string size:', jsonString.length, 'characters');
+      
+      localStorage.setItem('homepageBannerImages', jsonString);
+      console.log('✅ Successfully saved to localStorage');
+      
+      // Verify it was saved
+      const verify = localStorage.getItem('homepageBannerImages');
+      const verifyLength = verify ? JSON.parse(verify).length : 0;
+      console.log('🔍 Verification - localStorage contains', verifyLength, 'images');
+      
+      setBannerImages(nextImages);
+      window.dispatchEvent(new Event('localStorageUpdate'));
+      console.log('📢 Dispatched localStorageUpdate event');
+      
+      toast.success(`Banner images saved! (${nextImages.length} total)`);
+    } catch (error) {
+      console.error('❌ Error in saveBannerImages:', error);
+      toast.error('Failed to save banner images');
+    }
   };
 
   const compressBannerImage = (file: File): Promise<string> => {
+    console.log('🖼️ compressBannerImage started for file:', file.name, file.size, 'bytes');
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       const img = new Image();
 
-      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.onerror = () => {
+        console.error('❌ FileReader error');
+        reject(new Error('Failed to read file'));
+      };
       reader.onload = (event) => {
+        console.log('📖 File loaded into data URL');
         img.src = event.target?.result as string;
       };
 
-      img.onerror = () => reject(new Error('Failed to load image'));
+      img.onerror = () => {
+        console.error('❌ Image load error');
+        reject(new Error('Failed to load image'));
+      };
       img.onload = () => {
+        console.log('🎨 Image loaded, original size:', img.width, 'x', img.height);
         const canvas = document.createElement('canvas');
         let { width, height } = img;
 
@@ -155,6 +183,7 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
           const ratio = Math.min(widthRatio, heightRatio);
           width = Math.round(width * ratio);
           height = Math.round(height * ratio);
+          console.log('📐 Resized to:', width, 'x', height);
         }
 
         canvas.width = width;
@@ -163,6 +192,7 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
         ctx?.drawImage(img, 0, 0, width, height);
 
         const compressed = canvas.toDataURL('image/jpeg', 0.75);
+        console.log('✅ Compression complete. Base64 length:', compressed.length);
         resolve(compressed);
       };
 
@@ -171,30 +201,42 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
   };
 
   const handleBannerUpload = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
+    console.log('📤 handleBannerUpload called with', files?.length || 0, 'files');
+    
+    if (!files || files.length === 0) {
+      console.log('⚠️ No files provided');
+      return;
+    }
 
     const maxSizeBytes = 1024 * 1024; // 1MB recommendation
     const nextImages = [...bannerImages];
 
     for (const file of Array.from(files)) {
+      console.log('🔄 Processing file:', file.name);
+      
       if (!file.type.startsWith('image/')) {
+        console.log('❌ Not an image file:', file.type);
         toast.error('Only image files are allowed.');
         continue;
       }
 
       if (file.size > maxSizeBytes) {
+        console.log('⚠️ File size exceeds 1MB:', file.size);
         toast.info('Large image detected. Compressing before saving.');
       }
 
       try {
+        console.log('🔄 Starting compression for:', file.name);
         const compressed = await compressBannerImage(file);
+        console.log('✅ Compression successful, adding to array');
         nextImages.push(compressed);
       } catch (error) {
-        console.error(error);
+        console.error('❌ Error during compression:', error);
         toast.error('Failed to upload image. Please try another file.');
       }
     }
 
+    console.log('📦 All files processed. Saving', nextImages.length, 'images total');
     saveBannerImages(nextImages);
   };
 
