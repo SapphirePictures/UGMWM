@@ -263,7 +263,7 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
     }
 
     console.log('📦 All files processed. Saving', nextImages.length, 'images total');
-    saveBannerImages(nextImages);
+    await saveBannerImages(nextImages);
   };
 
   const navigationItems = [
