@@ -239,7 +239,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
       {/* Home Banner Image Space */}
       <div className="px-4 sm:px-6 lg:px-8 py-20 bg-[var(--wine)]">
         <div className="max-w-7xl mx-auto space-y-6">
-          {!isLoadingBannerImages && bannerImages.length > 0 && (
+          {bannerImages.length > 0 && (
             <div className="bg-[var(--wine-dark)] rounded-2xl p-4 md:p-12 border-2 border-[var(--gold)]">
                 {/* Mobile: Carousel, Desktop: Grid */}
                 <div className="relative w-full h-[160px] md:h-[240px] rounded-xl overflow-hidden">
