@@ -586,20 +586,35 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
           </div>
 
           {bannerImages.length > 0 ? (
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {bannerImages.map((src, index) => (
-                <div key={`${src}-${index}`} className="relative rounded-xl overflow-hidden border border-gray-200">
-                  <img src={src} alt={`Banner ${index + 1}`} className="w-full h-32 object-cover" />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="absolute top-2 right-2 bg-white/90"
-                    onClick={() => saveBannerImages(bannerImages.filter((_, i) => i !== index))}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ))}
+            <div className="mt-6 space-y-4">
+              <div className="flex justify-end">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    if (window.confirm('Delete all banner images? This cannot be undone.')) {
+                      saveBannerImages([]);
+                    }
+                  }}
+                >
+                  Clear All Banner Images
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {bannerImages.map((src, index) => (
+                  <div key={`${src}-${index}`} className="relative rounded-xl overflow-hidden border border-gray-200">
+                    <img src={src} alt={`Banner ${index + 1}`} className="w-full h-32 object-cover" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="absolute top-2 right-2 bg-white/90"
+                      onClick={() => saveBannerImages(bannerImages.filter((_, i) => i !== index))}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <p className="mt-4 text-sm text-gray-500 font-['Montserrat']">
