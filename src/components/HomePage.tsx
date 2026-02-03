@@ -244,7 +244,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 {/* Mobile: Carousel, Desktop: Grid */}
                 <div className="relative w-full h-[160px] md:h-[240px] rounded-xl overflow-hidden">
                   {/* Desktop Grid (md and above) */}
-                  <div className="grid h-full w-full" style={{ gridTemplateColumns: `repeat(${bannerImages.length}, 1fr)` }}>
+                  <div className="hidden md:grid h-full w-full" style={{ gridTemplateColumns: `repeat(${bannerImages.length}, 1fr)` }}>
                     {bannerImages.map((src, index) => (
                       <div key={`banner-${index}`} className="w-full h-full">
                         <img
