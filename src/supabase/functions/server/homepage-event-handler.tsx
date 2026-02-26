@@ -8,6 +8,9 @@ const HOMEPAGE_EVENT_KEY = 'homepage-event';
 // GET homepage event
 app.get('/', async (c) => {
   try {
+    c.header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    c.header('Pragma', 'no-cache');
+    c.header('Expires', '0');
     const event = await kv.get(HOMEPAGE_EVENT_KEY);
     
     // Return default event if none exists
@@ -18,6 +21,18 @@ app.get('/', async (c) => {
           description: 'Join us for a special time of worship, thanksgiving, and testimonies as we celebrate God\'s goodness and faithfulness throughout the year.',
           date: 'December 15, 2024',
           time: '8:00 AM - 2:00 PM',
+          isUpcoming: true,
+          totalDays: 1,
+          days: [
+            {
+              dayNumber: 1,
+              title: '',
+              content: '',
+              bannerImage: '',
+              liveDate: new Date().toISOString(),
+              isManuallyLive: true,
+            }
+          ],
         },
       });
     }
@@ -32,8 +47,11 @@ app.get('/', async (c) => {
 // POST/UPDATE homepage event
 app.post('/', async (c) => {
   try {
+    c.header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    c.header('Pragma', 'no-cache');
+    c.header('Expires', '0');
     const body = await c.req.json();
-    const { title, description, date, time } = body;
+    const { title, description, date, time, isUpcoming, totalDays, days } = body;
 
     // Validation
     if (!title || !description || !date || !time) {
@@ -48,6 +66,9 @@ app.post('/', async (c) => {
       description: description.trim(),
       date: date.trim(),
       time: time.trim(),
+      isUpcoming: typeof isUpcoming === 'boolean' ? isUpcoming : true,
+      totalDays: typeof totalDays === 'number' ? totalDays : 1,
+      days: Array.isArray(days) ? days : [],
       updatedAt: new Date().toISOString(),
     };
 

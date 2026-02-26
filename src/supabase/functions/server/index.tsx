@@ -273,6 +273,9 @@ app.post('/make-server-9f158f76/resources/:id/download', async (c) => {
 // Get all events (public)
 app.get('/make-server-9f158f76/events', async (c) => {
   try {
+    c.header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    c.header('Pragma', 'no-cache');
+    c.header('Expires', '0');
     const events = await getAllEvents();
     return c.json({ success: true, events });
   } catch (error) {
@@ -284,6 +287,9 @@ app.get('/make-server-9f158f76/events', async (c) => {
 // Get upcoming events (public)
 app.get('/make-server-9f158f76/events/upcoming', async (c) => {
   try {
+    c.header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    c.header('Pragma', 'no-cache');
+    c.header('Expires', '0');
     const events = await getUpcomingEvents();
     return c.json({ success: true, events });
   } catch (error) {
@@ -295,6 +301,9 @@ app.get('/make-server-9f158f76/events/upcoming', async (c) => {
 // Get event by ID (public)
 app.get('/make-server-9f158f76/events/:id', async (c) => {
   try {
+    c.header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    c.header('Pragma', 'no-cache');
+    c.header('Expires', '0');
     const id = c.req.param('id');
     const event = await getEventById(id);
     if (!event) {

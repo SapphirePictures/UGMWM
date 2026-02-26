@@ -236,11 +236,30 @@ const SUPABASE_PROJECT_ID = 'jhbpbopvzcxbfgyemhpa';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoYnBib3B2emN4YmZneWVtaHBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MTA3MDQsImV4cCI6MjA3OTE4NjcwNH0.KiAGv6PaE1b0Sl9FPs8-2DM9M2A88YJjPBkr13c0G0Y';
 const SUPABASE_API_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/make-server-9f158f76`;
 
+// Clear browser-only events cache (safe: does not touch Supabase data)
+export const clearEventsBrowserCache = async (): Promise<void> => {
+  try {
+    const database = await initDB();
+    await new Promise((resolve, reject) => {
+      const transaction = database.transaction([STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.clear();
+      request.onsuccess = () => resolve(true);
+      request.onerror = () => reject(request.error);
+    });
+  } catch (error) {
+    console.warn('Could not clear IndexedDB cache:', error);
+  }
+
+  localStorage.removeItem('churchEvents');
+};
+
 // Sync events with Supabase backend
 export const syncEventsWithSupabase = async (): Promise<any[]> => {
   try {
     const response = await fetch(`${SUPABASE_API_URL}/events`, {
       headers: { Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -271,6 +290,7 @@ export const createEventWithSync = async (eventData: any): Promise<any> => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       },
+      cache: 'no-store',
       body: JSON.stringify(eventData),
     });
 
@@ -314,6 +334,7 @@ export const updateEventWithSync = async (eventId: string, eventData: any): Prom
         'Content-Type': 'application/json',
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       },
+      cache: 'no-store',
       body: JSON.stringify(eventData),
     });
 
@@ -351,6 +372,7 @@ export const deleteEventWithSync = async (eventId: string): Promise<void> => {
       headers: {
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       },
+      cache: 'no-store',
     });
 
     if (!response.ok) {

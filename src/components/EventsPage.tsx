@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
-import { getAllEvents } from '../utils/storage';
+import { syncEventsWithSupabase } from '../utils/storage';
 import eventsHeroImg from '../assets/a02d98e1848270468d8689a4d10185e04425697c.png';
 
 interface EventsPageProps {
@@ -56,7 +56,7 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const events = await getAllEvents();
+        const events = await syncEventsWithSupabase();
         if (events.length > 0) {
           setAllEvents(events);
         } else {

@@ -54,6 +54,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     description: 'Join us for a special time of worship, thanksgiving, and testimonies as we celebrate God\'s goodness and faithfulness throughout the year.',
     date: 'December 15, 2024',
     time: '8:00 AM - 2:00 PM',
+    isUpcoming: true,
   });
 
   const loadBannerImages = React.useCallback(async () => {
@@ -118,6 +119,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/homepage-event`,
         {
           headers: { Authorization: `Bearer ${publicAnonKey}` },
+          cache: 'no-store',
         }
       );
 
@@ -329,17 +331,19 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
           {/* Upcoming Event Section */}
           <div
-            onClick={() => handleNavClick('events')}
+            onClick={() => handleNavClick('homepage-event-detail')}
             className="bg-[var(--wine-dark)] rounded-2xl p-8 md:p-12 cursor-pointer hover:bg-[var(--wine-light)] transition-all duration-300 border-2 border-[var(--gold)]"
           >
             <div className="flex items-start justify-between flex-col md:flex-row gap-6">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar className="w-6 h-6 text-[var(--gold)]" />
-                  <span className="text-[var(--gold)] font-['Montserrat'] text-white">
-                    Upcoming Event
-                  </span>
-                </div>
+                {homepageEvent.isUpcoming && (
+                  <div className="flex items-center gap-2 mb-3">
+                    <Calendar className="w-6 h-6 text-[var(--gold)]" />
+                    <span className="text-[var(--gold)] font-['Montserrat'] text-white">
+                      Upcoming Event
+                    </span>
+                  </div>
+                )}
                 <h2 className="font-['Montserrat'] text-3xl md:text-4xl mb-4 text-white">
                   {homepageEvent.title}
                 </h2>

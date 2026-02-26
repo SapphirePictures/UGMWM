@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Plus, Trash2, Edit, Calendar as CalendarIcon, Loader2, MapPin, Clock, Image as ImageIcon, Video, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
-import { getAllEvents, saveAllEvents, migrateFromLocalStorage } from '../utils/storage';
+import { syncEventsWithSupabase, createEventWithSync, updateEventWithSync, deleteEventWithSync, clearEventsBrowserCache } from '../utils/storage';
 
 interface MediaItem {
   id: string;
@@ -63,10 +63,7 @@ export function AdminEventsPage() {
 
   const initializeStorage = async () => {
     try {
-      // Migrate from localStorage to IndexedDB if needed
-      await migrateFromLocalStorage();
       await fetchEvents();
-      toast.success('Using IndexedDB - Much larger storage capacity!', { duration: 3000 });
     } catch (error) {
       console.error('Error initializing storage:', error);
     }
@@ -75,7 +72,7 @@ export function AdminEventsPage() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const events = await getAllEvents();
+      const events = await syncEventsWithSupabase();
       setEvents(events);
     } catch (error) {
       console.error('Error loading events:', error);
@@ -239,37 +236,18 @@ export function AdminEventsPage() {
 
     setIsSaving(true);
     try {
-      // Get existing events from IndexedDB
-      const existingEvents: Event[] = await getAllEvents();
-
       if (editingEvent) {
-        // Update existing event
-        const updatedEvents = existingEvents.map(e =>
-          e.id === editingEvent.id
-            ? {
-                ...e,
-                ...formData,
-                media: mediaItems,
-                updatedAt: new Date().toISOString(),
-              }
-            : e
-        );
-        
-        await saveAllEvents(updatedEvents);
+        await updateEventWithSync(editingEvent.id, {
+          ...formData,
+          media: mediaItems,
+        });
         window.dispatchEvent(new Event('localStorageUpdate'));
         toast.success('Event updated successfully');
       } else {
-        // Create new event
-        const newEvent: Event = {
-          id: `event-${Date.now()}`,
+        await createEventWithSync({
           ...formData,
           media: mediaItems,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        existingEvents.push(newEvent);
-        
-        await saveAllEvents(existingEvents);
+        });
         window.dispatchEvent(new Event('localStorageUpdate'));
         toast.success('Event created successfully');
       }
@@ -288,12 +266,7 @@ export function AdminEventsPage() {
     if (!window.confirm('Are you sure you want to delete this event?')) return;
 
     try {
-      // Get existing events from IndexedDB
-      const existingEvents: Event[] = await getAllEvents();
-      
-      // Filter out the deleted event
-      const updatedEvents = existingEvents.filter(e => e.id !== id);
-      await saveAllEvents(updatedEvents);
+      await deleteEventWithSync(id);
 
       // Trigger custom event for other components in same tab
       window.dispatchEvent(new Event('localStorageUpdate'));
@@ -307,25 +280,16 @@ export function AdminEventsPage() {
   };
 
   const clearAllMedia = async () => {
-    if (!window.confirm('⚠️ This will remove all uploaded images/videos from ALL events (keeping only URLs). Continue?')) return;
+    if (!window.confirm('This clears only browser cache for events on this device and reloads from server. Continue?')) return;
     
     try {
-      const events = await getAllEvents();
-      const cleanedEvents = events.map((event: Event) => ({
-        ...event,
-        // Keep only URL-based media (not base64)
-        media: event.media?.filter(m => !m.url.startsWith('data:')) || [],
-        // Keep only URL-based cover images
-        image: event.image?.startsWith('data:') ? '' : event.image,
-      }));
-      
-      await saveAllEvents(cleanedEvents);
+      await clearEventsBrowserCache();
       window.dispatchEvent(new Event('localStorageUpdate'));
-      toast.success('All uploaded media cleared. Storage freed up!');
+      toast.success('Browser cache cleared. Fresh events loaded from server.');
       await fetchEvents();
     } catch (error) {
       console.error('Error clearing media:', error);
-      toast.error('Failed to clear media');
+      toast.error('Failed to clear browser cache');
     }
   };
 
@@ -347,7 +311,7 @@ export function AdminEventsPage() {
             className="text-red-600 hover:bg-red-50 font-['Montserrat']"
           >
             <Trash2 className="w-4 h-4 mr-2" />
-            Clear Storage
+            Clear Browser Cache
           </Button>
           <Button
             onClick={() => handleOpenModal()}

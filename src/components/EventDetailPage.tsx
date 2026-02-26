@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Calendar, MapPin, Clock, ArrowLeft, Image as ImageIcon, Video, X, Play, Loader2 } from 'lucide-react';
-import { getAllEvents } from '../utils/storage';
+import { syncEventsWithSupabase } from '../utils/storage';
 
 interface MediaItem {
   id: string;
@@ -54,8 +54,8 @@ export function EventDetailPage({ eventId, onNavigate }: EventDetailPageProps) {
   const loadEvent = async () => {
     setLoading(true);
     try {
-      // Load events from IndexedDB
-      const events = await getAllEvents();
+      // Load events from Supabase (with cache sync)
+      const events = await syncEventsWithSupabase();
       const foundEvent = events.find((e: Event) => e.id === eventId);
       setEvent(foundEvent || null);
     } catch (error) {
