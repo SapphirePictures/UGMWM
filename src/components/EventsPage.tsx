@@ -9,62 +9,33 @@ interface EventsPageProps {
   onNavigate?: (page: string) => void;
 }
 
-export function EventsPage({ onNavigate }: EventsPageProps) {
-  // All events in one place (these are the default events)
-  const defaultEvents = [
-    {
-      id: 'thanksgiving-2024',
-      title: 'Annual Thanksgiving Service 2024',
-      date: '2024-12-15',
-      displayDate: 'December 15, 2024',
-      time: '8:00 AM - 2:00 PM',
-      location: 'Main Sanctuary, Oyo State',
-      description:
-        'Join us for a special time of worship, thanksgiving, and testimonies as we celebrate God\'s goodness and faithfulness throughout the year. Expect powerful worship, inspiring messages, and a time of corporate thanksgiving.',
-      image:
-        'https://images.unsplash.com/photo-1626954499077-b56bd315594d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjB3b3JzaGlwJTIwTmlnZXJpYXxlbnwxfHx8fDE3NjMzOTc3Mjl8MA&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-    {
-      id: 'youth-conf-2024',
-      title: 'Youth Conference 2024',
-      date: '2024-12-22',
-      displayDate: 'December 20-22, 2024',
-      time: '6:00 PM - 9:00 PM Daily',
-      location: 'Church Premises',
-      description:
-        'A three-day conference designed specifically for our youth. Powerful teachings, dynamic worship, and fellowship opportunities await. Theme: "Limitless in Christ" - Discovering your potential in God\'s grace.',
-      image:
-        'https://images.unsplash.com/photo-1551327420-4b280d52cc68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjBjb21tdW5pdHklMjBmZWxsb3dzaGlwfGVufDF8fHx8MTc2MzM5NzczMXww&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-    {
-      id: 'eoy-prayer-2024',
-      title: 'End of Year Prayer & Praise Night',
-      date: '2024-12-31',
-      displayDate: 'December 31, 2024',
-      time: '9:00 PM - 12:30 AM',
-      location: 'Main Sanctuary',
-      description:
-        'Cross over into the new year with us in prayer and praise. Join us for an evening of worship, thanksgiving, and prophetic declarations as we enter 2025 with faith and expectation.',
-      image:
-        'https://images.unsplash.com/photo-1729089049653-24312fdca908?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZW9wbGUlMjBwcmF5aW5nJTIwdG9nZXRoZXJ8ZW58MXx8fHwxNzYzMzA4NDExfDA&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-  ];
+interface EventItem {
+  id: string;
+  title: string;
+  date: string;
+  displayDate: string;
+  time: string;
+  location: string;
+  description: string;
+  image?: string;
+}
 
-  const [allEvents, setAllEvents] = useState(defaultEvents);
+export function EventsPage({ onNavigate }: EventsPageProps) {
+  const [allEvents, setAllEvents] = useState<EventItem[]>([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
 
   // Load events from IndexedDB on component mount and when page becomes visible
   useEffect(() => {
     const loadEvents = async () => {
+      setIsLoadingEvents(true);
       try {
         const events = await syncEventsWithSupabase();
-        if (events.length > 0) {
-          setAllEvents(events);
-        } else {
-          setAllEvents(defaultEvents);
-        }
+        setAllEvents(Array.isArray(events) ? events : []);
       } catch (error) {
         console.error('Error loading events:', error);
-        setAllEvents(defaultEvents);
+        setAllEvents([]);
+      } finally {
+        setIsLoadingEvents(false);
       }
     };
 
@@ -140,72 +111,97 @@ export function EventsPage({ onNavigate }: EventsPageProps) {
           </div>
 
           <div className="space-y-8">
-            {upcomingEvents.map((event, index) => (
-              <Card
-                key={index}
-                className="overflow-hidden hover:shadow-xl transition-shadow duration-300 rounded-2xl cursor-pointer"
-                onClick={() => onNavigate?.(`event-detail-${event.id}`)}
-              >
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-0">
-                  {/* Image */}
-                  <div className="lg:col-span-1 h-64 lg:h-auto bg-gray-200">
-                    {event.image ? (
-                      <img
-                        src={event.image}
-                        alt={event.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                          (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--wine)] to-[var(--wine-dark)]"><svg class="w-16 h-16 text-white opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--wine)] to-[var(--wine-dark)]">
-                        <svg className="w-16 h-16 text-white opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
+            {isLoadingEvents ? (
+              [...Array(2)].map((_, index) => (
+                <Card key={`event-loader-${index}`} className="overflow-hidden rounded-2xl">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 animate-pulse">
+                    <div className="lg:col-span-1 h-64 lg:h-auto bg-gray-200"></div>
+                    <div className="lg:col-span-2 p-8">
+                      <div className="h-8 w-3/4 bg-gray-200 rounded mb-4"></div>
+                      <div className="space-y-3 mb-6">
+                        <div className="h-5 w-1/2 bg-gray-200 rounded"></div>
+                        <div className="h-5 w-1/3 bg-gray-200 rounded"></div>
+                        <div className="h-5 w-2/3 bg-gray-200 rounded"></div>
                       </div>
-                    )}
+                      <div className="h-5 w-full bg-gray-200 rounded mb-2"></div>
+                      <div className="h-5 w-5/6 bg-gray-200 rounded mb-6"></div>
+                      <div className="h-10 w-40 bg-gray-200 rounded"></div>
+                    </div>
                   </div>
-
-                  {/* Content */}
-                  <div className="lg:col-span-2 p-8">
-                    <h3 className="font-['Montserrat'] text-2xl text-[var(--wine)] mb-4">
-                      {event.title}
-                    </h3>
-
-                    <div className="flex flex-col gap-3 mb-6">
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <Calendar className="w-5 h-5 text-[var(--gold)]" />
-                        <span className="font-['Merriweather']">{event.displayDate}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <Clock className="w-5 h-5 text-[var(--gold)]" />
-                        <span className="font-['Merriweather']">{event.time}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-gray-600">
-                        <MapPin className="w-5 h-5 text-[var(--gold)]" />
-                        <span className="font-['Merriweather']">{event.location}</span>
-                      </div>
+                </Card>
+              ))
+            ) : upcomingEvents.length > 0 ? (
+              upcomingEvents.map((event, index) => (
+                <Card
+                  key={index}
+                  className="overflow-hidden hover:shadow-xl transition-shadow duration-300 rounded-2xl cursor-pointer"
+                  onClick={() => onNavigate?.(`event-detail-${event.id}`)}
+                >
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-0">
+                    {/* Image */}
+                    <div className="lg:col-span-1 h-64 lg:h-auto bg-gray-200">
+                      {event.image ? (
+                        <img
+                          src={event.image}
+                          alt={event.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--wine)] to-[var(--wine-dark)]"><svg class="w-16 h-16 text-white opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--wine)] to-[var(--wine-dark)]">
+                          <svg className="w-16 h-16 text-white opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                          </svg>
+                        </div>
+                      )}
                     </div>
 
-                    <p className="text-gray-700 font-['Merriweather'] mb-6 leading-relaxed">
-                      {event.description}
-                    </p>
+                    {/* Content */}
+                    <div className="lg:col-span-2 p-8">
+                      <h3 className="font-['Montserrat'] text-2xl text-[var(--wine)] mb-4">
+                        {event.title}
+                      </h3>
 
-                    <Button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onNavigate?.(`event-detail-${event.id}`);
-                      }}
-                      className="bg-[var(--wine)] text-white hover:bg-[var(--wine-dark)] font-['Montserrat']"
-                    >
-                      View Event Details
-                    </Button>
+                      <div className="flex flex-col gap-3 mb-6">
+                        <div className="flex items-center gap-3 text-gray-600">
+                          <Calendar className="w-5 h-5 text-[var(--gold)]" />
+                          <span className="font-['Merriweather']">{event.displayDate}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-gray-600">
+                          <Clock className="w-5 h-5 text-[var(--gold)]" />
+                          <span className="font-['Merriweather']">{event.time}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-gray-600">
+                          <MapPin className="w-5 h-5 text-[var(--gold)]" />
+                          <span className="font-['Merriweather']">{event.location}</span>
+                        </div>
+                      </div>
+
+                      <p className="text-gray-700 font-['Merriweather'] mb-6 leading-relaxed">
+                        {event.description}
+                      </p>
+
+                      <Button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate?.(`event-detail-${event.id}`);
+                        }}
+                        className="bg-[var(--wine)] text-white hover:bg-[var(--wine-dark)] font-['Montserrat']"
+                      >
+                        View Event Details
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </Card>
+              ))
+            ) : (
+              <Card className="p-8 rounded-2xl text-center">
+                <p className="text-gray-600 font-['Merriweather']">No upcoming events available.</p>
               </Card>
-            ))}
+            )}
           </div>
         </div>
       </section>

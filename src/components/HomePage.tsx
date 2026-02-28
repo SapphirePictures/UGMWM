@@ -40,6 +40,14 @@ interface Sermon {
   updatedAt: string;
 }
 
+interface HomepageEvent {
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  isUpcoming: boolean;
+}
+
 export function HomePage({ onNavigate }: HomePageProps) {
   const [bannerImages, setBannerImages] = React.useState<string[]>([]);
   const [bannerIndex, setBannerIndex] = React.useState(0);
@@ -49,13 +57,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
   const [selectedSermon, setSelectedSermon] = React.useState<Sermon | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [videoLoaded, setVideoLoaded] = React.useState(false);
-  const [homepageEvent, setHomepageEvent] = React.useState({
-    title: 'Annual Thanksgiving Service 2024',
-    description: 'Join us for a special time of worship, thanksgiving, and testimonies as we celebrate God\'s goodness and faithfulness throughout the year.',
-    date: 'December 15, 2024',
-    time: '8:00 AM - 2:00 PM',
-    isUpcoming: true,
-  });
+  const [homepageEvent, setHomepageEvent] = React.useState<HomepageEvent | null>(null);
+  const [isLoadingHomepageEvent, setIsLoadingHomepageEvent] = React.useState(true);
 
   const loadBannerImages = React.useCallback(async () => {
     setIsLoadingBannerImages(true);
@@ -114,6 +117,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
   }, []);
 
   const fetchHomepageEvent = async () => {
+    setIsLoadingHomepageEvent(true);
     try {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/homepage-event`,
@@ -134,6 +138,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
       }
     } catch (error) {
       // Silently fail - this is expected when backend is not deployed
+    } finally {
+      setIsLoadingHomepageEvent(false);
     }
   };
 
@@ -344,36 +350,50 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
           {/* Upcoming Event Section */}
           <div className="bg-[var(--wine-dark)] rounded-2xl p-8 md:p-12 border-2 border-[var(--gold)]">
-            <div className="flex items-start justify-between flex-col md:flex-row gap-6">
-              <div className="flex-1">
-                {homepageEvent.isUpcoming && (
-                  <div className="flex items-center gap-2 mb-3">
-                    <Calendar className="w-6 h-6 text-[var(--gold)]" />
-                    <span className="text-[var(--gold)] font-['Montserrat'] text-white">
-                      Upcoming Event
-                    </span>
-                  </div>
-                )}
-                <h2 className="font-['Montserrat'] text-3xl md:text-4xl mb-4 text-white">
-                  {homepageEvent.title}
-                </h2>
-                <p className="text-white/80 font-['Merriweather'] mb-4 text-lg">
-                  {homepageEvent.description}
-                </p>
-                <div className="flex items-center gap-4 text-white/90">
-                  <span className="font-['Montserrat']">{homepageEvent.date}</span>
-                  <span>•</span>
-                  <span className="font-['Montserrat']">{homepageEvent.time}</span>
-                </div>
+            {isLoadingHomepageEvent ? (
+              <div className="animate-pulse">
+                <div className="h-5 w-40 bg-white/20 rounded mb-4"></div>
+                <div className="h-10 w-3/4 bg-white/20 rounded mb-4"></div>
+                <div className="h-5 w-full bg-white/20 rounded mb-2"></div>
+                <div className="h-5 w-5/6 bg-white/20 rounded mb-6"></div>
+                <div className="h-5 w-1/2 bg-white/20 rounded"></div>
               </div>
-              <Button
-                type="button"
-                onClick={handleHomepageEventLearnMore}
-                className="bg-[var(--gold)] text-[var(--wine-dark)] hover:bg-[var(--gold-light)] font-['Montserrat'] self-end"
-              >
-                Learn More <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </div>
+            ) : homepageEvent ? (
+              <div className="flex items-start justify-between flex-col md:flex-row gap-6">
+                <div className="flex-1">
+                  {homepageEvent.isUpcoming && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <Calendar className="w-6 h-6 text-[var(--gold)]" />
+                      <span className="text-[var(--gold)] font-['Montserrat'] text-white">
+                        Upcoming Event
+                      </span>
+                    </div>
+                  )}
+                  <h2 className="font-['Montserrat'] text-3xl md:text-4xl mb-4 text-white">
+                    {homepageEvent.title}
+                  </h2>
+                  <p className="text-white/80 font-['Merriweather'] mb-4 text-lg">
+                    {homepageEvent.description}
+                  </p>
+                  <div className="flex items-center gap-4 text-white/90">
+                    <span className="font-['Montserrat']">{homepageEvent.date}</span>
+                    <span>•</span>
+                    <span className="font-['Montserrat']">{homepageEvent.time}</span>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  onClick={handleHomepageEventLearnMore}
+                  className="bg-[var(--gold)] text-[var(--wine-dark)] hover:bg-[var(--gold-light)] font-['Montserrat'] self-end"
+                >
+                  Learn More <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </div>
+            ) : (
+              <div className="text-white/80 font-['Merriweather'] text-lg">
+                No featured event available right now.
+              </div>
+            )}
           </div>
         </div>
       </div>
