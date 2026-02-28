@@ -177,6 +177,19 @@ export function HomePage({ onNavigate }: HomePageProps) {
     }
   };
 
+  const handleHomepageEventLearnMore = () => {
+    const page = 'homepage-event-detail';
+
+    if (onNavigate) {
+      onNavigate(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    window.location.hash = page;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen">
       {/* Hero Section with Video Background */}
@@ -355,7 +368,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               </div>
               <Button
                 type="button"
-                onClick={() => handleNavClick('homepage-event-detail')}
+                onClick={handleHomepageEventLearnMore}
                 className="bg-[var(--gold)] text-[var(--wine-dark)] hover:bg-[var(--gold-light)] font-['Montserrat'] self-end"
               >
                 Learn More <ArrowRight className="ml-2 w-5 h-5" />
