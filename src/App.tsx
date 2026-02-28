@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
 import { HomePage } from './components/HomePage';
+import { HomepageEventDetailPage } from './components/HomepageEventDetailPage';
 import { AboutPage } from './components/AboutPage';
 import { EventsPage } from './components/EventsPage';
 import { AllEventsPage } from './components/AllEventsPage';
@@ -19,27 +20,41 @@ import { ResourcesPage } from './components/ResourcesPage';
 import { WatchLivePage } from './components/WatchLivePage';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('home');
-  const [preSelectedUnit, setPreSelectedUnit] = useState<string | undefined>(undefined);
+  const getRouteFromHash = () => {
+    const hash = window.location.hash.slice(1).trim();
+
+    if (!hash) {
+      return { pageName: 'home', unit: undefined as string | undefined };
+    }
+
+    const [pageName, queryString] = hash.split('?');
+    const unit = queryString ? new URLSearchParams(queryString).get('unit') || undefined : undefined;
+
+    return {
+      pageName: pageName || 'home',
+      unit,
+    };
+  };
+
+  const [currentPage, setCurrentPage] = useState(() => getRouteFromHash().pageName);
+  const [preSelectedUnit, setPreSelectedUnit] = useState<string | undefined>(() => getRouteFromHash().unit);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
   // Handle URL hash changes on load and when hash changes
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1); // Remove the '#' symbol
-      if (hash) {
-        handleNavigate(hash);
-      }
+    const syncFromHash = () => {
+      const { pageName, unit } = getRouteFromHash();
+      setCurrentPage(pageName);
+      setPreSelectedUnit(unit);
     };
 
-    // Check for hash on initial load
-    handleHashChange();
+    syncFromHash();
 
     // Listen for hash changes
-    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('hashchange', syncFromHash);
 
     return () => {
-      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('hashchange', syncFromHash);
     };
   }, []);
 
@@ -77,6 +92,8 @@ export default function App() {
     switch (currentPage) {
       case 'home':
         return <HomePage onNavigate={handleNavigate} />;
+      case 'homepage-event-detail':
+        return <HomepageEventDetailPage onNavigate={handleNavigate} />;
       case 'about':
         return <AboutPage onNavigate={handleNavigate} />;
       case 'events':
