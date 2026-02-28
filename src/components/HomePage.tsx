@@ -184,15 +184,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
   };
 
   const handleHomepageEventLearnMore = () => {
-    const page = 'homepage-event-detail';
-
-    if (onNavigate) {
-      onNavigate(page);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    window.location.hash = page;
+    window.location.hash = 'homepage-event-detail';
+    onNavigate?.('homepage-event-detail');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
