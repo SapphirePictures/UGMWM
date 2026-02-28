@@ -330,10 +330,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             )}
 
           {/* Upcoming Event Section */}
-          <div
-            onClick={() => handleNavClick('homepage-event-detail')}
-            className="bg-[var(--wine-dark)] rounded-2xl p-8 md:p-12 cursor-pointer hover:bg-[var(--wine-light)] transition-all duration-300 border-2 border-[var(--gold)]"
-          >
+          <div className="bg-[var(--wine-dark)] rounded-2xl p-8 md:p-12 border-2 border-[var(--gold)]">
             <div className="flex items-start justify-between flex-col md:flex-row gap-6">
               <div className="flex-1">
                 {homepageEvent.isUpcoming && (
@@ -356,7 +353,11 @@ export function HomePage({ onNavigate }: HomePageProps) {
                   <span className="font-['Montserrat']">{homepageEvent.time}</span>
                 </div>
               </div>
-              <Button className="bg-[var(--gold)] text-[var(--wine-dark)] hover:bg-[var(--gold-light)] font-['Montserrat'] self-end">
+              <Button
+                type="button"
+                onClick={() => handleNavClick('homepage-event-detail')}
+                className="bg-[var(--gold)] text-[var(--wine-dark)] hover:bg-[var(--gold-light)] font-['Montserrat'] self-end"
+              >
                 Learn More <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </div>
