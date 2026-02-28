@@ -184,8 +184,19 @@ export function HomePage({ onNavigate }: HomePageProps) {
   };
 
   const handleHomepageEventLearnMore = () => {
-    window.location.hash = 'homepage-event-detail';
+    const targetHash = '#homepage-event-detail';
+    const targetUrl = `${window.location.pathname}${targetHash}`;
+
+    if (window.location.hash !== targetHash) {
+      window.location.hash = 'homepage-event-detail';
+    }
+
     onNavigate?.('homepage-event-detail');
+
+    if (window.location.hash !== targetHash) {
+      window.location.assign(targetUrl);
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
