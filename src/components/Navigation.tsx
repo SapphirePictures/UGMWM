@@ -11,6 +11,7 @@ interface NavigationProps {
 export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const hasSolidNav = isScrolled || currentPage !== 'home';
 
   const desktopLinkBase =
     "relative pb-1 font-['Montserrat'] transition-colors after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-full after:scale-x-0 after:bg-[var(--gold)] after:origin-left after:transition-transform after:duration-200 hover:after:scale-x-100";
@@ -30,8 +31,7 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
     setMobileMenuOpen(false);
   };
 
-  const desktopLinkColor =
-    currentPage === 'home' && !isScrolled ? 'text-white' : isScrolled ? 'text-white' : 'text-black';
+  const desktopLinkColor = hasSolidNav ? 'text-white' : 'text-white';
 
   const getDesktopLinkClass = (page: string) =>
     `${desktopLinkBase} ${desktopLinkColor} ${currentPage === page ? 'text-[var(--gold)] after:scale-x-100' : 'hover:text-[var(--gold)]'}`;
@@ -39,7 +39,7 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-[var(--wine)] shadow-lg' : 'bg-transparent'
+        hasSolidNav ? 'bg-[var(--wine)] shadow-lg' : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -111,9 +111,7 @@ export function Navigation({ currentPage = 'home', onNavigate }: NavigationProps
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`md:hidden p-2 transition-colors ${
-              currentPage === 'home' || isScrolled ? 'text-white' : 'text-black'
-            }`}
+            className="md:hidden p-2 transition-colors text-white"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>

@@ -147,7 +147,7 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-[var(--wine)] text-white pt-32 pb-16">
+      <div className="bg-[var(--wine)] text-white pt-36 md:pt-40 pb-12 md:pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Button
             onClick={() => onNavigate?.('home')}
@@ -165,7 +165,7 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
             )}
           </div>
 
-          <h1 className="font-['Montserrat'] text-4xl md:text-5xl mb-4">
+          <h1 className="font-['Montserrat'] text-3xl sm:text-4xl md:text-5xl mb-4 leading-tight">
             {event.title}
           </h1>
 
@@ -173,7 +173,7 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
             {event.description}
           </p>
 
-          <div className="flex items-center gap-4 text-white/90">
+          <div className="flex flex-wrap items-center gap-3 md:gap-4 text-white/90">
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
               <span className="font-['Montserrat']">{event.date}</span>
@@ -194,9 +194,9 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
       </div>
 
       {/* Day Content Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-12">
         {/* Day Navigation */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 gap-4">
           <div>
             <h2 className="font-['Montserrat'] text-2xl text-[var(--wine)] mb-1">
               Day {currentDay} {currentDayData?.title && `- ${currentDayData.title}`}
