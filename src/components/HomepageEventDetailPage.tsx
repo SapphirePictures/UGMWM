@@ -197,6 +197,44 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
     }
   };
 
+  const toOrdinalWord = (value: number): string => {
+    const words: Record<number, string> = {
+      1: 'One',
+      2: 'Two',
+      3: 'Three',
+      4: 'Four',
+      5: 'Five',
+      6: 'Six',
+      7: 'Seven',
+      8: 'Eight',
+      9: 'Nine',
+      10: 'Ten',
+      11: 'Eleven',
+      12: 'Twelve',
+      13: 'Thirteen',
+      14: 'Fourteen',
+      15: 'Fifteen',
+      16: 'Sixteen',
+      17: 'Seventeen',
+      18: 'Eighteen',
+      19: 'Nineteen',
+      20: 'Twenty',
+      21: 'Twenty-One',
+      22: 'Twenty-Two',
+      23: 'Twenty-Three',
+      24: 'Twenty-Four',
+      25: 'Twenty-Five',
+      26: 'Twenty-Six',
+      27: 'Twenty-Seven',
+      28: 'Twenty-Eight',
+      29: 'Twenty-Nine',
+      30: 'Thirty',
+      31: 'Thirty-One',
+    };
+
+    return words[value] || String(value);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
@@ -222,7 +260,7 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
   }
 
   const currentDayData = getCurrentDayData();
-  const totalAccessibleDays = event.days?.filter(day => isDayAccessible(day)).length || 0;
+  const contextualDaySubtitle = `Day ${toOrdinalWord(currentDay)} of ${event.title}`;
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -282,7 +320,7 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
                 Day {currentDay} {currentDayData?.title && `- ${currentDayData.title}`}
               </h2>
               <p className="text-gray-600 font-['Merriweather'] text-sm">
-                {totalAccessibleDays} of {event.totalDays || 1} days accessible
+                {contextualDaySubtitle}
               </p>
             </div>
 
