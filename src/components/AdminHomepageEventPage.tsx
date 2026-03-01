@@ -7,7 +7,7 @@ import { Switch } from './ui/switch';
 import { LogOut, Save, Calendar, Clock, Loader2, RefreshCw, Upload, Plus, Trash2, CalendarDays } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface AdminHomepageEventPageProps {
   onNavigate?: (page: string) => void;
@@ -46,6 +46,7 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
   const [selectedDay, setSelectedDay] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 
   useEffect(() => {
     fetchHomepageEvent();
@@ -225,7 +226,10 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
         throw new Error('Failed to save homepage event');
       }
 
+      const result = await response.json();
       setEvent(payload);
+      const savedAtValue = result?.event?.updatedAt ? new Date(result.event.updatedAt) : new Date();
+      setLastSavedAt(savedAtValue.toLocaleString());
       window.dispatchEvent(new Event('homepageEventUpdated'));
       toast.success('Homepage event updated successfully!');
     } catch (error) {
@@ -412,6 +416,14 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
                   Refresh
                 </Button>
               </div>
+
+              {lastSavedAt && (
+                <div className="mt-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3">
+                  <p className="text-sm text-green-800 font-['Merriweather']" aria-live="polite">
+                    Saved successfully at {lastSavedAt}
+                  </p>
+                </div>
+              )}
             </Card>
 
             {/* Day Management Card */}

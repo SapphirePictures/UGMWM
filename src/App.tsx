@@ -18,6 +18,7 @@ import { AdminLoginPage } from './components/AdminLoginPage';
 import { AdminDashboard } from './components/AdminDashboard';
 import { ResourcesPage } from './components/ResourcesPage';
 import { WatchLivePage } from './components/WatchLivePage';
+import { Toaster } from 'sonner';
 
 export default function App() {
   const getRouteFromHash = () => {
@@ -137,6 +138,7 @@ export default function App() {
       <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
       {renderPage()}
       <Footer onNavigate={handleNavigate} />
+      <Toaster richColors position="top-right" />
     </div>
   );
 }
