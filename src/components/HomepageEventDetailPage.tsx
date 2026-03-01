@@ -339,10 +339,10 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
                   <Lock className="w-5 h-5 text-gray-500 mt-0.5" />
                   <div>
                     <p className="font-['Montserrat'] text-sm text-gray-700 font-semibold mb-1">
-                      More Content Coming Soon
+                      More Content Is Coming
                     </p>
                     <p className="font-['Merriweather'] text-sm text-gray-600">
-                      Additional days will be unlocked according to the event schedule. Check back daily for new content!
+                      Additional content will be available the next day. Please check back tomorrow.
                     </p>
                   </div>
                 </div>

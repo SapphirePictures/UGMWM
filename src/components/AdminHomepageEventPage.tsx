@@ -552,6 +552,29 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
                     </TabsContent>
                   ))}
                 </Tabs>
+
+                <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <p className="text-sm text-gray-600 font-['Merriweather']">
+                    Finished editing this day? Save to publish your daily content updates.
+                  </p>
+                  <Button
+                    onClick={handleSave}
+                    disabled={isLoading}
+                    className="bg-[var(--wine)] text-white hover:bg-[var(--wine-dark)] font-['Montserrat']"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        Save Daily Content
+                      </>
+                    )}
+                  </Button>
+                </div>
               </Card>
             )}
 
