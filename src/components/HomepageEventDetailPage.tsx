@@ -200,9 +200,9 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
   const totalAccessibleDays = event.days?.filter(day => isDayAccessible(day)).length || 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-20">
       {/* Hero Section */}
-      <div className="bg-[var(--wine)] text-white pt-40 md:pt-44 pb-12 md:pb-16">
+      <div className="bg-[var(--wine)] text-white py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Button
             onClick={() => onNavigate?.('home')}
@@ -249,37 +249,39 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
       </div>
 
       {/* Day Content Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-14">
         {/* Day Navigation */}
-        <div className="flex items-center justify-between mb-8 gap-4">
-          <div>
-            <h2 className="font-['Montserrat'] text-2xl text-[var(--wine)] mb-1">
-              Day {currentDay} {currentDayData?.title && `- ${currentDayData.title}`}
-            </h2>
-            <p className="text-gray-600 font-['Merriweather'] text-sm">
-              {totalAccessibleDays} of {event.totalDays || 1} days accessible
-            </p>
-          </div>
+        <Card className="p-5 md:p-6 rounded-2xl mb-8">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="font-['Montserrat'] text-2xl text-[var(--wine)] mb-1">
+                Day {currentDay} {currentDayData?.title && `- ${currentDayData.title}`}
+              </h2>
+              <p className="text-gray-600 font-['Merriweather'] text-sm">
+                {totalAccessibleDays} of {event.totalDays || 1} days accessible
+              </p>
+            </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={navigateToPrevious}
-              disabled={!canNavigateToPrevious()}
-              variant="outline"
-              className="border-[var(--wine)] text-[var(--wine)] hover:bg-[var(--wine)] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              onClick={navigateToNext}
-              disabled={!canNavigateToNext()}
-              variant="outline"
-              className="border-[var(--wine)] text-[var(--wine)] hover:bg-[var(--wine)] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={navigateToPrevious}
+                disabled={!canNavigateToPrevious()}
+                variant="outline"
+                className="border-[var(--wine)] text-[var(--wine)] hover:bg-[var(--wine)] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button
+                onClick={navigateToNext}
+                disabled={!canNavigateToNext()}
+                variant="outline"
+                className="border-[var(--wine)] text-[var(--wine)] hover:bg-[var(--wine)] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
-        </div>
+        </Card>
 
         {/* Day Content */}
         {currentDayData ? (
