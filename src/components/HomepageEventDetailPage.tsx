@@ -98,9 +98,34 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
 
       const data = await response.json();
       if (data.event) {
-        setEvent(data.event);
+        const totalDays = Math.max(1, Number(data.event.totalDays) || 1);
+        const incomingDays = Array.isArray(data.event.days) ? data.event.days : [];
+
+        const normalizedDays: EventDay[] = Array.from({ length: totalDays }, (_, index) => {
+          const dayNumber = index + 1;
+          const existingDay = incomingDays.find((day: any) => Number(day?.dayNumber) === dayNumber);
+
+          return {
+            dayNumber,
+            title: typeof existingDay?.title === 'string' ? existingDay.title : '',
+            content: typeof existingDay?.content === 'string' ? existingDay.content : '',
+            bannerImage: typeof existingDay?.bannerImage === 'string' ? existingDay.bannerImage : '',
+            liveDate: typeof existingDay?.liveDate === 'string' && existingDay.liveDate
+              ? existingDay.liveDate
+              : new Date().toISOString(),
+            isManuallyLive: Boolean(existingDay?.isManuallyLive),
+          };
+        });
+
+        const normalizedEvent: HomepageEvent = {
+          ...data.event,
+          totalDays,
+          days: normalizedDays,
+        };
+
+        setEvent(normalizedEvent);
         // Find the latest accessible day
-        const accessibleDays = (data.event.days || [])
+        const accessibleDays = normalizedDays
           .filter((day: EventDay) => isDayAccessible(day))
           .sort((a: EventDay, b: EventDay) => a.dayNumber - b.dayNumber);
 
@@ -248,9 +273,9 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
       </div>
 
       {/* Day Content Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-14">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-12 md:py-14">
         {/* Day Navigation */}
-        <Card className="p-5 md:p-6 rounded-2xl mb-8">
+        <Card className="px-6 py-5 md:px-8 md:py-6 rounded-2xl mb-8">
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-2">
               <h2 className="font-['Montserrat'] text-2xl text-[var(--wine)]">

@@ -161,6 +161,25 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
     return event.days.find(d => d.dayNumber === selectedDay);
   };
 
+  const buildNormalizedDaysForSave = (): EventDay[] => {
+    const totalDays = Math.max(1, Number(event.totalDays) || 1);
+    const existingDays = Array.isArray(event.days) ? event.days : [];
+
+    return Array.from({ length: totalDays }, (_, index) => {
+      const dayNumber = index + 1;
+      const existing = existingDays.find((day) => Number(day.dayNumber) === dayNumber);
+
+      return {
+        dayNumber,
+        title: existing?.title || '',
+        content: existing?.content || '',
+        bannerImage: existing?.bannerImage || '',
+        liveDate: existing?.liveDate || new Date().toISOString().split('T')[0],
+        isManuallyLive: Boolean(existing?.isManuallyLive),
+      };
+    });
+  };
+
   const handleSave = async () => {
     // Validation
     if (!event.title.trim()) {
@@ -180,6 +199,13 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
       return;
     }
 
+    const normalizedDays = buildNormalizedDaysForSave();
+    const payload = {
+      ...event,
+      totalDays: Math.max(1, Number(event.totalDays) || 1),
+      days: normalizedDays,
+    };
+
     setIsLoading(true);
     try {
       const response = await fetch(
@@ -191,7 +217,7 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
             Authorization: `Bearer ${publicAnonKey}`,
           },
           cache: 'no-store',
-          body: JSON.stringify(event),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -199,6 +225,7 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
         throw new Error('Failed to save homepage event');
       }
 
+      setEvent(payload);
       window.dispatchEvent(new Event('homepageEventUpdated'));
       toast.success('Homepage event updated successfully!');
     } catch (error) {
@@ -388,7 +415,7 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
             </Card>
 
             {/* Day Management Card */}
-            {event.totalDays > 1 && (
+            {event.totalDays >= 1 && (
               <Card className="p-8 rounded-2xl border-t-4 border-[var(--gold)]">
                 <h2 className="font-['Montserrat'] text-xl text-[var(--wine)] mb-6">
                   Daily Content Management
