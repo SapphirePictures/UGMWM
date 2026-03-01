@@ -206,8 +206,7 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Button
             onClick={() => onNavigate?.('home')}
-            variant="outline"
-            className="mb-6 border-white text-white hover:bg-white hover:text-[var(--wine)] font-['Montserrat']"
+            className="mb-6 bg-transparent border border-white/70 text-white hover:bg-white/10 hover:text-white font-['Montserrat']"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
@@ -253,8 +252,8 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
         {/* Day Navigation */}
         <Card className="p-5 md:p-6 rounded-2xl mb-8">
           <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="font-['Montserrat'] text-2xl text-[var(--wine)] mb-1">
+            <div className="space-y-2">
+              <h2 className="font-['Montserrat'] text-2xl text-[var(--wine)]">
                 Day {currentDay} {currentDayData?.title && `- ${currentDayData.title}`}
               </h2>
               <p className="text-gray-600 font-['Merriweather'] text-sm">
