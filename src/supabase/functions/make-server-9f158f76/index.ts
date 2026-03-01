@@ -1,3 +1,1 @@
-import app from '../server/index.tsx';
-
-export default app;
+import '../server/index.tsx';
