@@ -332,24 +332,6 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
               </div>
             </Card>
 
-            {/* Day Status Info */}
-            <Card className="p-4 rounded-xl bg-blue-50 border-blue-200">
-              <div className="flex items-start gap-3">
-                <Calendar className="w-5 h-5 text-blue-600 mt-0.5" />
-                <div>
-                  <p className="font-['Montserrat'] text-sm text-blue-900 font-semibold mb-1">
-                    Day {currentDay} Status
-                  </p>
-                  <p className="font-['Merriweather'] text-sm text-blue-700">
-                    {currentDayData.isManuallyLive 
-                      ? 'This day has been made available by the event organizers'
-                      : `This day became available on ${new Date(currentDayData.liveDate).toLocaleDateString()}`
-                    }
-                  </p>
-                </div>
-              </div>
-            </Card>
-
             {/* Locked Days Preview */}
             {event.days && event.days.some(day => !isDayAccessible(day)) && (
               <Card className="p-6 rounded-xl bg-gray-100 border-gray-300">
