@@ -109,6 +109,20 @@ export function HomePage({ onNavigate }: HomePageProps) {
   }, [loadBannerImages]);
 
   React.useEffect(() => {
+    const handleHomepageEventUpdate = () => {
+      fetchHomepageEvent();
+    };
+
+    window.addEventListener('homepageEventUpdated', handleHomepageEventUpdate);
+    window.addEventListener('focus', handleHomepageEventUpdate);
+
+    return () => {
+      window.removeEventListener('homepageEventUpdated', handleHomepageEventUpdate);
+      window.removeEventListener('focus', handleHomepageEventUpdate);
+    };
+  }, []);
+
+  React.useEffect(() => {
     const handleResize = () => {
       setIsDesktop(window.innerWidth >= 768);
     };
@@ -119,10 +133,14 @@ export function HomePage({ onNavigate }: HomePageProps) {
   const fetchHomepageEvent = async () => {
     setIsLoadingHomepageEvent(true);
     try {
+      const cacheBuster = Date.now();
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/homepage-event`,
+        `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/homepage-event?t=${cacheBuster}`,
         {
-          headers: { Authorization: `Bearer ${publicAnonKey}` },
+          headers: {
+            Authorization: `Bearer ${publicAnonKey}`,
+            'Cache-Control': 'no-cache',
+          },
           cache: 'no-store',
         }
       );

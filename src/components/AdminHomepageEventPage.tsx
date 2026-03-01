@@ -199,6 +199,7 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
         throw new Error('Failed to save homepage event');
       }
 
+      window.dispatchEvent(new Event('homepageEventUpdated'));
       toast.success('Homepage event updated successfully!');
     } catch (error) {
       console.error('Error saving homepage event:', error);

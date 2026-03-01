@@ -35,15 +35,59 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
 
   useEffect(() => {
     fetchEventDetails();
+
+    const handleHomepageEventUpdate = () => {
+      fetchEventDetails(false);
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchEventDetails(false);
+      }
+    };
+
+    window.addEventListener('homepageEventUpdated', handleHomepageEventUpdate);
+    window.addEventListener('focus', handleHomepageEventUpdate);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    const refreshInterval = window.setInterval(() => {
+      fetchEventDetails(false);
+    }, 60000);
+
+    return () => {
+      window.removeEventListener('homepageEventUpdated', handleHomepageEventUpdate);
+      window.removeEventListener('focus', handleHomepageEventUpdate);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.clearInterval(refreshInterval);
+    };
   }, []);
 
-  const fetchEventDetails = async () => {
-    setIsLoading(true);
+  const getLiveDateStart = (liveDateValue: string): Date | null => {
+    if (!liveDateValue) return null;
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(liveDateValue)) {
+      const [year, month, day] = liveDateValue.split('-').map(Number);
+      return new Date(year, month - 1, day, 0, 0, 0, 0);
+    }
+
+    const parsedDate = new Date(liveDateValue);
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+  };
+
+  const fetchEventDetails = async (showLoader: boolean = true) => {
+    if (showLoader) {
+      setIsLoading(true);
+    }
+
     try {
+      const cacheBuster = Date.now();
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/homepage-event`,
+        `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/homepage-event?t=${cacheBuster}`,
         {
-          headers: { Authorization: `Bearer ${publicAnonKey}` },
+          headers: {
+            Authorization: `Bearer ${publicAnonKey}`,
+            'Cache-Control': 'no-cache',
+          },
           cache: 'no-store',
         }
       );
@@ -56,15 +100,22 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
       if (data.event) {
         setEvent(data.event);
         // Find the latest accessible day
-        const accessibleDays = data.event.days?.filter((day: EventDay) => isDayAccessible(day)) || [];
+        const accessibleDays = (data.event.days || [])
+          .filter((day: EventDay) => isDayAccessible(day))
+          .sort((a: EventDay, b: EventDay) => a.dayNumber - b.dayNumber);
+
         if (accessibleDays.length > 0) {
           setCurrentDay(accessibleDays[accessibleDays.length - 1].dayNumber);
+        } else {
+          setCurrentDay(1);
         }
       }
     } catch (error) {
       console.error('Error fetching event:', error);
     } finally {
-      setIsLoading(false);
+      if (showLoader) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -75,9 +126,13 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
     if (day.isManuallyLive) return true;
     
     // Check if day is live based on date
-    const now = new Date();
-    const liveDate = new Date(day.liveDate);
-    return liveDate <= now;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const liveDate = getLiveDateStart(day.liveDate);
+    if (!liveDate) return false;
+
+    return liveDate <= today;
   };
 
   const getCurrentDayData = (): EventDay | null => {
@@ -147,7 +202,7 @@ export function HomepageEventDetailPage({ onNavigate }: HomepageEventDetailPageP
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-[var(--wine)] text-white pt-36 md:pt-40 pb-12 md:pb-16">
+      <div className="bg-[var(--wine)] text-white pt-40 md:pt-44 pb-12 md:pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Button
             onClick={() => onNavigate?.('home')}
