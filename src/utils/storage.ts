@@ -236,6 +236,31 @@ const SUPABASE_PROJECT_ID = 'jhbpbopvzcxbfgyemhpa';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoYnBib3B2emN4YmZneWVtaHBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MTA3MDQsImV4cCI6MjA3OTE4NjcwNH0.KiAGv6PaE1b0Sl9FPs8-2DM9M2A88YJjPBkr13c0G0Y';
 const SUPABASE_API_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1/make-server-9f158f76`;
 
+const getAdminSessionToken = (): string | null => {
+  try {
+    return sessionStorage.getItem('admin_session_token');
+  } catch {
+    return null;
+  }
+};
+
+const getAuthHeaders = (includeJsonContentType = false): Record<string, string> => {
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+  };
+
+  if (includeJsonContentType) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  const adminToken = getAdminSessionToken();
+  if (adminToken) {
+    headers['X-Admin-Session'] = adminToken;
+  }
+
+  return headers;
+};
+
 // Clear browser-only events cache (safe: does not touch Supabase data)
 export const clearEventsBrowserCache = async (): Promise<void> => {
   try {
@@ -286,10 +311,7 @@ export const createEventWithSync = async (eventData: any): Promise<any> => {
   try {
     const response = await fetch(`${SUPABASE_API_URL}/events`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
+      headers: getAuthHeaders(true),
       cache: 'no-store',
       body: JSON.stringify(eventData),
     });
@@ -330,10 +352,7 @@ export const updateEventWithSync = async (eventId: string, eventData: any): Prom
   try {
     const response = await fetch(`${SUPABASE_API_URL}/events/${eventId}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
+      headers: getAuthHeaders(true),
       cache: 'no-store',
       body: JSON.stringify(eventData),
     });
@@ -369,9 +388,7 @@ export const deleteEventWithSync = async (eventId: string): Promise<void> => {
   try {
     const response = await fetch(`${SUPABASE_API_URL}/events/${eventId}`, {
       method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
+      headers: getAuthHeaders(),
       cache: 'no-store',
     });
 

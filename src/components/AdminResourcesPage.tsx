@@ -9,6 +9,7 @@ import { Plus, Trash2, Edit, FileText, Loader2, Download, DollarSign } from 'luc
 import { toast } from 'sonner@2.0.3';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
+import { getAdminAuthHeaders } from '../utils/adminAuth';
 
 interface Resource {
   id: string;
@@ -56,7 +57,7 @@ export function AdminResourcesPage() {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/resources`,
         {
-          headers: { Authorization: `Bearer ${publicAnonKey}` },
+          headers: getAdminAuthHeaders(publicAnonKey),
         }
       );
 
@@ -121,10 +122,7 @@ export function AdminResourcesPage() {
 
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${publicAnonKey}`,
-        },
+        headers: getAdminAuthHeaders(publicAnonKey, { includeJsonContentType: true }),
         body: JSON.stringify(formData),
       });
 
@@ -149,7 +147,7 @@ export function AdminResourcesPage() {
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/resources/${id}`,
         {
           method: 'DELETE',
-          headers: { Authorization: `Bearer ${publicAnonKey}` },
+          headers: getAdminAuthHeaders(publicAnonKey),
         }
       );
 

@@ -19,6 +19,7 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { ResourcesPage } from './components/ResourcesPage';
 import { WatchLivePage } from './components/WatchLivePage';
 import { Toaster } from 'sonner';
+import { clearAdminSessionToken, hasAdminSessionToken } from './utils/adminAuth';
 
 export default function App() {
   const getRouteFromHash = () => {
@@ -39,7 +40,7 @@ export default function App() {
 
   const [currentPage, setCurrentPage] = useState(() => getRouteFromHash().pageName);
   const [preSelectedUnit, setPreSelectedUnit] = useState<string | undefined>(() => getRouteFromHash().unit);
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => hasAdminSessionToken());
 
   // Handle URL hash changes on load and when hash changes
   useEffect(() => {
@@ -50,6 +51,7 @@ export default function App() {
     };
 
     syncFromHash();
+    setIsAdminLoggedIn(hasAdminSessionToken());
 
     // Listen for hash changes
     window.addEventListener('hashchange', syncFromHash);
@@ -114,11 +116,20 @@ export default function App() {
       case 'you-are-unlimited':
         return <AdminLoginPage onNavigate={handleNavigate} onLogin={() => setIsAdminLoggedIn(true)} />;
       case 'temporary-dashboard':
-        return <AdminDashboard key={`admin-dashboard-${Date.now()}`} onNavigate={handleNavigate} onLogout={() => setIsAdminLoggedIn(false)} />;
+        return <AdminDashboard key={`admin-dashboard-${Date.now()}`} onNavigate={handleNavigate} onLogout={() => {
+          clearAdminSessionToken();
+          setIsAdminLoggedIn(false);
+        }} />;
       case 'admin-volunteers':
-        return <AdminVolunteersPage onNavigate={handleNavigate} onLogout={() => setIsAdminLoggedIn(false)} />;
+        return <AdminVolunteersPage onNavigate={handleNavigate} onLogout={() => {
+          clearAdminSessionToken();
+          setIsAdminLoggedIn(false);
+        }} />;
       case 'setup-instructions':
-        return <SetupInstructionsPage onNavigate={handleNavigate} onLogout={() => setIsAdminLoggedIn(false)} />;
+        return <SetupInstructionsPage onNavigate={handleNavigate} onLogout={() => {
+          clearAdminSessionToken();
+          setIsAdminLoggedIn(false);
+        }} />;
       case 'resources':
         return <ResourcesPage onNavigate={handleNavigate} />;
       case 'watch-live':

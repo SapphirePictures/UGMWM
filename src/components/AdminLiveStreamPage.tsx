@@ -8,6 +8,7 @@ import { Switch } from './ui/switch';
 import { Radio, Save, Eye, ArrowLeft, LogOut } from 'lucide-react';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { toast } from 'sonner@2.0.3';
+import { getAdminAuthHeaders } from '../utils/adminAuth';
 
 interface AdminLiveStreamPageProps {
   onNavigate?: (page: string) => void;
@@ -38,9 +39,7 @@ export function AdminLiveStreamPage({ onNavigate, onLogout }: AdminLiveStreamPag
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/live-stream/get`,
         {
-          headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
-          },
+          headers: getAdminAuthHeaders(publicAnonKey),
         }
       );
 
@@ -66,10 +65,7 @@ export function AdminLiveStreamPage({ onNavigate, onLogout }: AdminLiveStreamPag
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/live-stream/update`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${publicAnonKey}`,
-          },
+          headers: getAdminAuthHeaders(publicAnonKey, { includeJsonContentType: true }),
           body: JSON.stringify(formData),
         }
       );

@@ -8,6 +8,7 @@ import { Plus, Trash2, Edit, Video, Loader2, Calendar, User } from 'lucide-react
 import { toast } from 'sonner@2.0.3';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
+import { getAdminAuthHeaders } from '../utils/adminAuth';
 
 interface Sermon {
   id: string;
@@ -53,7 +54,7 @@ export function AdminSermonsPage({ onNavigate, onLogout }: AdminSermonsPageProps
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/sermons`,
         {
-          headers: { Authorization: `Bearer ${publicAnonKey}` },
+          headers: getAdminAuthHeaders(publicAnonKey),
         }
       );
 
@@ -112,10 +113,7 @@ export function AdminSermonsPage({ onNavigate, onLogout }: AdminSermonsPageProps
 
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${publicAnonKey}`,
-        },
+        headers: getAdminAuthHeaders(publicAnonKey, { includeJsonContentType: true }),
         body: JSON.stringify(formData),
       });
 
@@ -140,7 +138,7 @@ export function AdminSermonsPage({ onNavigate, onLogout }: AdminSermonsPageProps
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/sermons/${id}`,
         {
           method: 'DELETE',
-          headers: { Authorization: `Bearer ${publicAnonKey}` },
+          headers: getAdminAuthHeaders(publicAnonKey),
         }
       );
 

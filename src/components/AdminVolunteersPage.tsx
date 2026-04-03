@@ -5,6 +5,7 @@ import { ArrowLeft, Loader2, Download, RefreshCw, Mail, Phone, Calendar, LogOut,
 import { toast } from 'sonner@2.0.3';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { ChangePasswordModal } from './ChangePasswordModal';
+import { getAdminAuthHeaders } from '../utils/adminAuth';
 
 interface VolunteerApplication {
   id: string;
@@ -61,9 +62,7 @@ export function AdminVolunteersPage({ onNavigate, onLogout }: AdminVolunteersPag
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/volunteer/applications`,
         {
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
-          },
+          headers: getAdminAuthHeaders(publicAnonKey),
         }
       );
 

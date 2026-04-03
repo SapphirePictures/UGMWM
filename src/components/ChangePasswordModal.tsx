@@ -6,6 +6,7 @@ import { Card } from './ui/card';
 import { Eye, EyeOff, Lock, X } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
+import { getAdminAuthHeaders } from '../utils/adminAuth';
 
 interface ChangePasswordModalProps {
   onClose: () => void;
@@ -46,10 +47,7 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/admin/change-password`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${publicAnonKey}`,
-          },
+          headers: getAdminAuthHeaders(publicAnonKey, { includeJsonContentType: true }),
           body: JSON.stringify({
             currentPassword,
             newPassword,

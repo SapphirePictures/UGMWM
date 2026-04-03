@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import { createClient } from '@supabase/supabase-js';
+import { getAdminAuthHeaders } from '../utils/adminAuth';
 
 const apiBase = `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76`;
 const supabase = createClient(`https://${projectId}.supabase.co`, publicAnonKey);
@@ -59,9 +60,7 @@ export function AdminEventGalleryPage() {
     setLoading(true);
     try {
       const res = await fetch(`${apiBase}/event-galleries`, {
-        headers: {
-          Authorization: `Bearer ${publicAnonKey}`,
-        },
+        headers: getAdminAuthHeaders(publicAnonKey),
       });
 
       if (!res.ok) {
@@ -163,10 +162,7 @@ export function AdminEventGalleryPage() {
 
       const res = await fetch(endpoint, {
         method: editingGallery ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${publicAnonKey}`,
-        },
+        headers: getAdminAuthHeaders(publicAnonKey, { includeJsonContentType: true }),
         body: JSON.stringify(payload),
       });
 
@@ -203,9 +199,7 @@ export function AdminEventGalleryPage() {
     try {
       const res = await fetch(`${apiBase}/event-galleries/${id}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${publicAnonKey}`,
-        },
+        headers: getAdminAuthHeaders(publicAnonKey),
       });
 
       if (!res.ok) {

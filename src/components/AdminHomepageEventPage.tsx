@@ -8,6 +8,7 @@ import { LogOut, Save, Calendar, Clock, Loader2, RefreshCw, Upload, Plus, Trash2
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { toast } from 'sonner';
+import { getAdminAuthHeaders } from '../utils/adminAuth';
 
 interface AdminHomepageEventPageProps {
   onNavigate?: (page: string) => void;
@@ -29,6 +30,7 @@ interface HomepageEvent {
   date: string;
   time: string;
   isUpcoming: boolean;
+  enableMultiEvent: boolean;
   totalDays: number;
   days: EventDay[];
 }
@@ -40,6 +42,7 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
     date: '',
     time: '',
     isUpcoming: true,
+    enableMultiEvent: false,
     totalDays: 1,
     days: [],
   });
@@ -58,9 +61,7 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/homepage-event`,
         {
-          headers: {
-            Authorization: `Bearer ${publicAnonKey}`,
-          },
+          headers: getAdminAuthHeaders(publicAnonKey),
           cache: 'no-store',
         }
       );
@@ -213,10 +214,7 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/homepage-event`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${publicAnonKey}`,
-          },
+          headers: getAdminAuthHeaders(publicAnonKey, { includeJsonContentType: true }),
           cache: 'no-store',
           body: JSON.stringify(payload),
         }
@@ -324,6 +322,27 @@ export function AdminHomepageEventPage({ onNavigate, onLogout }: AdminHomepageEv
                     onCheckedChange={(checked) => setEvent({ ...event, isUpcoming: checked })}
                     style={{
                       backgroundColor: event.isUpcoming ? '#16a34a' : '#9ca3af'
+                    }}
+                  />
+                </div>
+
+                {/* Multi-Event Display Toggle */}
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                  <div className="flex-1">
+                    <label className="block text-sm font-['Montserrat'] text-gray-700 font-semibold mb-1">
+                      Enable Multi-Event Display
+                    </label>
+                    <p className="text-xs text-gray-500 font-['Merriweather']">
+                      {event.enableMultiEvent 
+                        ? '✓ All active days will be displayed on the homepage' 
+                        : '✗ Only the main event summary will be displayed'}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={event.enableMultiEvent}
+                    onCheckedChange={(checked) => setEvent({ ...event, enableMultiEvent: checked })}
+                    style={{
+                      backgroundColor: event.enableMultiEvent ? '#16a34a' : '#9ca3af'
                     }}
                   />
                 </div>

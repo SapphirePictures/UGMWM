@@ -22,6 +22,7 @@ app.get('/', async (c) => {
           date: 'December 15, 2024',
           time: '8:00 AM - 2:00 PM',
           isUpcoming: true,
+          enableMultiEvent: false,
           totalDays: 1,
           days: [
             {
@@ -100,6 +101,12 @@ app.post('/', async (c) => {
           : typeof existingEvent?.isUpcoming === 'boolean'
             ? existingEvent.isUpcoming
             : true,
+      enableMultiEvent:
+        typeof body?.enableMultiEvent === 'boolean'
+          ? body.enableMultiEvent
+          : typeof existingEvent?.enableMultiEvent === 'boolean'
+            ? existingEvent.enableMultiEvent
+            : false,
       totalDays: computedTotalDays,
       days: normalizedDays,
       updatedAt: new Date().toISOString(),

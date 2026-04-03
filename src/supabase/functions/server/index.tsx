@@ -9,6 +9,14 @@ import homepageEventHandler from './homepage-event-handler.tsx';
 import bannerImagesHandler from './banner-images-handler.tsx';
 import { createEventGallery, getAllEventGalleries, getEventGalleryById, updateEventGallery, deleteEventGallery } from './event-gallery-handler.tsx';
 import * as kv from './kv_store.tsx';
+import {
+  createAdminSession,
+  deleteAdminSession,
+  ensurePasswordHash,
+  validateAdminSession,
+  verifyPassword,
+  hashPassword,
+} from './admin-auth.tsx';
 
 const app = new Hono();
 
@@ -19,6 +27,84 @@ initializeResourceBucket();
 // Middleware
 app.use('*', cors());
 app.use('*', logger(console.log));
+
+const ADMIN_SESSION_HEADER = 'x-admin-session';
+const API_BASE = '/make-server-9f158f76';
+
+const requiresAdminAuth = (path: string, method: string): boolean => {
+  const normalizedMethod = method.toUpperCase();
+
+  if (!path.startsWith(API_BASE)) {
+    return false;
+  }
+
+  if (path === `${API_BASE}/admin/change-password`) {
+    return true;
+  }
+
+  if (path === `${API_BASE}/admin/logout`) {
+    return true;
+  }
+
+  if (path === `${API_BASE}/volunteer/applications` && normalizedMethod === 'GET') {
+    return true;
+  }
+
+  if (path === `${API_BASE}/live-stream/update` && normalizedMethod === 'POST') {
+    return true;
+  }
+
+  if (path === `${API_BASE}/homepage-event` && normalizedMethod === 'POST') {
+    return true;
+  }
+
+  if (path === `${API_BASE}/banner-images` && normalizedMethod === 'POST') {
+    return true;
+  }
+
+  if (path === `${API_BASE}/banner-images` && normalizedMethod === 'DELETE') {
+    return true;
+  }
+
+  if (path.startsWith(`${API_BASE}/sermons`) && ['POST', 'PUT', 'DELETE'].includes(normalizedMethod)) {
+    return true;
+  }
+
+  if (path.startsWith(`${API_BASE}/resources`) && ['POST', 'PUT', 'DELETE'].includes(normalizedMethod)) {
+    if (path.endsWith('/download')) {
+      return false;
+    }
+    return true;
+  }
+
+  if (path.startsWith(`${API_BASE}/events`) && ['POST', 'PUT', 'DELETE'].includes(normalizedMethod)) {
+    return true;
+  }
+
+  if (path.startsWith(`${API_BASE}/event-galleries`) && ['POST', 'PUT', 'DELETE'].includes(normalizedMethod)) {
+    return true;
+  }
+
+  return false;
+};
+
+app.use('*', async (c, next) => {
+  const path = c.req.path;
+  const method = c.req.method;
+
+  if (!requiresAdminAuth(path, method)) {
+    return await next();
+  }
+
+  const token = c.req.header(ADMIN_SESSION_HEADER);
+  const isValid = await validateAdminSession(token);
+
+  if (!isValid) {
+    return c.json({ success: false, error: 'Unauthorized' }, 401);
+  }
+
+  return await next();
+});
 
 // Health check
 app.get('/make-server-9f158f76/health', (c) => {
@@ -70,21 +156,42 @@ app.get('/make-server-9f158f76/volunteer/applications', async (c) => {
   }
 });
 
-// Admin password management routes
-app.post('/make-server-9f158f76/admin/get-password', async (c) => {
+// Admin authentication routes
+app.post('/make-server-9f158f76/admin/login', async (c) => {
   try {
-    let password = await kv.get('admin_password');
-    
-    // If no password exists, set default password
-    if (!password) {
-      const defaultPassword = 'ugm-admin-2024';
-      await kv.set('admin_password', defaultPassword);
-      password = defaultPassword;
+    const { password } = await c.req.json();
+
+    if (!password || typeof password !== 'string') {
+      return c.json({ success: false, error: 'Password is required' }, 400);
     }
-    
-    return c.json({ success: true, password });
+
+    const storedPasswordHash = await ensurePasswordHash();
+    const isValid = await verifyPassword(password, storedPasswordHash);
+
+    if (!isValid) {
+      return c.json({ success: false, error: 'Invalid credentials' }, 401);
+    }
+
+    const session = await createAdminSession();
+
+    return c.json({
+      success: true,
+      sessionToken: session.token,
+      expiresAt: session.expiresAt,
+    });
   } catch (error) {
-    console.error('Error getting admin password:', error);
+    console.error('Error during admin login:', error);
+    return c.json({ success: false, error: String(error) }, 500);
+  }
+});
+
+app.post('/make-server-9f158f76/admin/logout', async (c) => {
+  try {
+    const sessionToken = c.req.header(ADMIN_SESSION_HEADER);
+    await deleteAdminSession(sessionToken);
+    return c.json({ success: true, message: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Error during admin logout:', error);
     return c.json({ success: false, error: String(error) }, 500);
   }
 });
@@ -92,28 +199,29 @@ app.post('/make-server-9f158f76/admin/get-password', async (c) => {
 app.post('/make-server-9f158f76/admin/change-password', async (c) => {
   try {
     const { currentPassword, newPassword } = await c.req.json();
-    
-    // Get current stored password
-    let storedPassword = await kv.get('admin_password');
-    
-    // If no password exists, set default
-    if (!storedPassword) {
-      storedPassword = 'ugm-admin-2024';
-      await kv.set('admin_password', storedPassword);
+
+    if (!currentPassword || typeof currentPassword !== 'string') {
+      return c.json({ success: false, error: 'Current password is required' }, 400);
     }
-    
-    // Verify current password
-    if (currentPassword !== storedPassword) {
+
+    if (!newPassword || typeof newPassword !== 'string') {
+      return c.json({ success: false, error: 'New password is required' }, 400);
+    }
+
+    const storedPasswordHash = await ensurePasswordHash();
+    const matchesCurrent = await verifyPassword(currentPassword, storedPasswordHash);
+
+    if (!matchesCurrent) {
       return c.json({ success: false, error: 'Current password is incorrect' }, 401);
     }
-    
-    // Validate new password
+
     if (!newPassword || newPassword.length < 8) {
       return c.json({ success: false, error: 'New password must be at least 8 characters' }, 400);
     }
-    
-    // Update password
-    await kv.set('admin_password', newPassword);
+
+    const nextPasswordHash = await hashPassword(newPassword);
+    await kv.set('admin_password_hash', nextPasswordHash);
+    await kv.del('admin_password');
     
     console.log('Admin password changed successfully');
     return c.json({ success: true, message: 'Password changed successfully' });

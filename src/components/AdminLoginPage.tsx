@@ -6,6 +6,7 @@ import { Label } from './ui/label';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
+import { setAdminSessionToken } from '../utils/adminAuth';
 
 interface AdminLoginPageProps {
   onNavigate?: (page: string) => void;
@@ -22,21 +23,23 @@ export function AdminLoginPage({ onNavigate, onLogin }: AdminLoginPageProps) {
     setIsLoading(true);
 
     try {
-      // Get password from server
+      // Verify password on server
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/admin/get-password`,
+        `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/admin/login`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${publicAnonKey}`,
           },
+          body: JSON.stringify({ password }),
         }
       );
 
       const data = await response.json();
 
-      if (data.success && password === data.password) {
+      if (response.ok && data.success && data.sessionToken) {
+        setAdminSessionToken(data.sessionToken);
         toast.success('Login successful!');
         onLogin();
         if (onNavigate) {

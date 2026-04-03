@@ -46,6 +46,16 @@ interface HomepageEvent {
   date: string;
   time: string;
   isUpcoming: boolean;
+  enableMultiEvent: boolean;
+  totalDays: number;
+  days: {
+    dayNumber: number;
+    title: string;
+    content: string;
+    bannerImage: string;
+    liveDate: string;
+    isManuallyLive: boolean;
+  }[];
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
@@ -381,36 +391,89 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 <div className="h-5 w-1/2 bg-white/20 rounded"></div>
               </div>
             ) : homepageEvent ? (
-              <div className="flex items-start justify-between flex-col md:flex-row gap-6">
-                <div className="flex-1">
-                  {homepageEvent.isUpcoming && (
-                    <div className="flex items-center gap-2 mb-3">
-                      <Calendar className="w-6 h-6 text-[var(--gold)]" />
-                      <span className="text-[var(--gold)] font-['Montserrat'] text-white">
-                        Upcoming Event
-                      </span>
+              <>
+                {/* Main Event Summary - Always shown */}
+                <div className="flex items-start justify-between flex-col md:flex-row gap-6 mb-8">
+                  <div className="flex-1">
+                    {homepageEvent.isUpcoming && (
+                      <div className="flex items-center gap-2 mb-3">
+                        <Calendar className="w-6 h-6 text-[var(--gold)]" />
+                        <span className="text-[var(--gold)] font-['Montserrat'] text-white">
+                          Upcoming Event
+                        </span>
+                      </div>
+                    )}
+                    <h2 className="font-['Montserrat'] text-3xl md:text-4xl mb-4 text-white">
+                      {homepageEvent.title}
+                    </h2>
+                    <p className="text-white/80 font-['Merriweather'] mb-4 text-lg">
+                      {homepageEvent.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-white/90">
+                      <span className="font-['Montserrat']">{homepageEvent.date}</span>
+                      <span>•</span>
+                      <span className="font-['Montserrat']">{homepageEvent.time}</span>
                     </div>
-                  )}
-                  <h2 className="font-['Montserrat'] text-3xl md:text-4xl mb-4 text-white">
-                    {homepageEvent.title}
-                  </h2>
-                  <p className="text-white/80 font-['Merriweather'] mb-4 text-lg">
-                    {homepageEvent.description}
-                  </p>
-                  <div className="flex items-center gap-4 text-white/90">
-                    <span className="font-['Montserrat']">{homepageEvent.date}</span>
-                    <span>•</span>
-                    <span className="font-['Montserrat']">{homepageEvent.time}</span>
                   </div>
+                  <Button
+                    type="button"
+                    onClick={handleHomepageEventLearnMore}
+                    className="bg-[var(--gold)] text-[var(--wine-dark)] hover:bg-[var(--gold-light)] font-['Montserrat'] self-end"
+                  >
+                    Learn More <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
                 </div>
-                <Button
-                  type="button"
-                  onClick={handleHomepageEventLearnMore}
-                  className="bg-[var(--gold)] text-[var(--wine-dark)] hover:bg-[var(--gold-light)] font-['Montserrat'] self-end"
-                >
-                  Learn More <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </div>
+
+                {/* Multi-Event Display - Shown only when enabled */}
+                {homepageEvent.enableMultiEvent && homepageEvent.days && homepageEvent.days.length > 0 && (
+                  <div className="space-y-4 border-t-2 border-[var(--gold)]/30 pt-8">
+                    <h3 className="font-['Montserrat'] text-2xl text-[var(--gold)] mb-4">
+                      Event Schedule
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {homepageEvent.days
+                        .filter(day => {
+                          // Show day if manually live or if live date has passed
+                          if (day.isManuallyLive) return true;
+                          const liveDate = new Date(day.liveDate);
+                          const now = new Date();
+                          return liveDate <= now;
+                        })
+                        .map((day) => (
+                          <Card
+                            key={day.dayNumber}
+                            className="bg-[var(--wine)] border-[var(--gold)] border-2 p-6 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                          >
+                            {day.bannerImage && (
+                              <div className="relative w-full h-32 rounded-lg overflow-hidden mb-4">
+                                <img
+                                  src={day.bannerImage}
+                                  alt={day.title || `Day ${day.dayNumber}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="bg-[var(--gold)] text-[var(--wine-dark)] px-3 py-1 rounded-full text-sm font-['Montserrat'] font-semibold">
+                                Day {day.dayNumber}
+                              </div>
+                            </div>
+                            {day.title && (
+                              <h4 className="font-['Montserrat'] text-xl text-white mb-2">
+                                {day.title}
+                              </h4>
+                            )}
+                            {day.content && (
+                              <p className="text-white/80 font-['Merriweather'] text-sm line-clamp-3">
+                                {day.content}
+                              </p>
+                            )}
+                          </Card>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-white/80 font-['Merriweather'] text-lg">
                 No featured event available right now.

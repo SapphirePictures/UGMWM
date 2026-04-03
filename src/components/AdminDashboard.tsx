@@ -32,6 +32,7 @@ import { AdminEventGalleryPage } from './AdminEventGalleryPage';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { toast } from 'sonner';
+import { getAdminAuthHeaders } from '../utils/adminAuth';
 
 interface AdminDashboardProps {
   onNavigate?: (page: string) => void;
@@ -96,9 +97,7 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/volunteer/applications`,
         {
-          headers: {
-            Authorization: `Bearer ${publicAnonKey}`,
-          },
+          headers: getAdminAuthHeaders(publicAnonKey),
         }
       );
 
@@ -152,10 +151,7 @@ export function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
         `https://${projectId}.supabase.co/functions/v1/make-server-9f158f76/banner-images`,
         {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${publicAnonKey}`,
-            'Content-Type': 'application/json',
-          },
+          headers: getAdminAuthHeaders(publicAnonKey, { includeJsonContentType: true }),
           body: JSON.stringify({ images: nextImages }),
         }
       );
