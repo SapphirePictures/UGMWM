@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { ArrowLeft, Loader2, Download, RefreshCw, Mail, Phone, Calendar, LogOut, Key } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import { getAdminAuthHeaders } from '../utils/adminAuth';

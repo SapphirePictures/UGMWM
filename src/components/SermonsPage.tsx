@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Play, Download, Share2, Clock, Loader2, Video } from 'lucide-react';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { VideoPlayerModal } from './VideoPlayerModal';
 import { getOptimizedImageUrl, getImageSrcSet } from '../utils/storage';
 

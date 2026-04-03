@@ -7,7 +7,7 @@ import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
 import { Radio, Save, Eye, ArrowLeft, LogOut } from 'lucide-react';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { getAdminAuthHeaders } from '../utils/adminAuth';
 
 interface AdminLiveStreamPageProps {

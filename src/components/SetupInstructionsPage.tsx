@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { ArrowLeft, Mail, FileSpreadsheet, CheckCircle, Copy } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface SetupInstructionsPageProps {
   onNavigate?: (page: string) => void;
